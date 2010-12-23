@@ -58,10 +58,10 @@ $.cssHooks.transform = {
       tanY = Math.tan(skew[1]);
       elem.style.filter = [
         "progid:DXImageTransform.Microsoft.Matrix(",
-          "M11="+cos+",",
-          "M12="+(-sin)+",",
-          "M21="+sin+",",
-          "M22="+cos+",",
+          "M11="+cos*scale[0]+",",
+          "M12="+(-sin*scale[1])+",",
+          "M21="+sin*scale[0]+",",
+          "M22="+cos*scale[1]+",",
           "SizingMethod='auto expand'",
         ")"
       ].join('');
