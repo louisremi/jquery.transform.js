@@ -47,21 +47,42 @@ $.cssHooks.transform = {
     
     // save new transform
     $.data(elem, 'transform', transform);
+    
+    // We can improve performance by avoiding unnecessary transforms
+    // skew is the less likely to be used
+    if (skew == [0,0]) {
+      skew = 0;
+    }
 
     if (supportTransform) {
-      elem.style[supportTransform] = 'rotate('+rotate+'rad) scale('+scale+') skew('+skew[0]+'rad,'+skew[1]+'rad)';
+      elem.style[supportTransform] = 'rotate('+rotate+'rad) scale('+scale+')'+(skew?' skew('+skew[0]+'rad,'+skew[1]+'rad)' : '');
 
     } else if (_support.matrixFilter) {
-      cos = Math.cos(rotate);
-      sin = Math.sin(rotate);
-      tanX = Math.tan(skew[0]);
-      tanY = Math.tan(skew[1]);
+      var
+        cos = Math.cos(rotate),
+        sin = Math.sin(rotate),
+        tmp11 = cos*scale[0], // 1
+        tmp12 = -sin*scale[1], // tanX
+        tmp21 = sin*scale[0], // tanY
+        tmp22 = cos*scale[1], // 1
+        tanX,
+        tanY;
+        
+      if (skew) {
+        tanX = Math.tan(skew[0]);
+        tanY = Math.tan(skew[1]);
+        tmp11 += tmp12*tanY;
+        tmp12 += tmp11*tanX;
+        tmp21 += tmp22*tanY;
+        tmp22 += tmp21*tanX;
+      }
+        
       elem.style.filter = [
         "progid:DXImageTransform.Microsoft.Matrix(",
-          "M11="+cos*scale[0]+",",
-          "M12="+(-sin*scale[1])+",",
-          "M21="+sin*scale[0]+",",
-          "M22="+cos*scale[1]+",",
+          "M11="+tmp11+",",
+          "M12="+tmp12+",",
+          "M21="+tmp21+",",
+          "M22="+tmp22+",",
           "SizingMethod='auto expand'",
         ")"
       ].join('');
