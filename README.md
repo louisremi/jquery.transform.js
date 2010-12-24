@@ -4,27 +4,27 @@ Usage:
 Set transform with a string
 ---------------------------
 
-  $('#myDiv').css('transform', 'rotate(25deg) scale(2,.5) skew(-35deg)');
-  $('#myDiv').animate({transform: 'rotate(25deg) scale(2,.5) skew(-35deg)'});
+    $('#myDiv').css('transform', 'rotate(25deg) scale(2,.5) skew(-35deg)');
+    $('#myDiv').animate({transform: 'rotate(25deg) scale(2,.5) skew(-35deg)'});
 
 **Remember, transforms are additive!**
 
-  $('#myDiv').css('transform', 'rotate(25deg) scale(2)');
-  $('#myDiv').css('transform', 'rotate(65deg) scale(3)');
+    $('#myDiv').css('transform', 'rotate(25deg) scale(2)');
+    $('#myDiv').css('transform', 'rotate(65deg) scale(3)');
 
 The previous two lines result in #myDiv being 90deg and 6 times bigger.
 
 Set transform with an object
 ----------------------------
 
-  $('#myDiv').css('transform', {
-    // has to be in radian
-    rotate: Math.PI/2,
-    // has to be an array of X and Y scales
-    scale: [2, .5],
-    // has to be an array of X and Y skews in radian
-    skew: [-Math.PI/4, Math.PI/3]
-  });
+    $('#myDiv').css('transform', {
+      // has to be in radian
+      rotate: Math.PI/2,
+      // has to be an array of X and Y scales
+      scale: [2, .5],
+      // has to be an array of X and Y skews in radian
+      skew: [-Math.PI/4, Math.PI/3]
+    });
 
 **performance tip**: jquery.transform.js deals faster with objects. 
 Strings always need to be parsed because we need to keep track of successive transforms for animate().
@@ -34,19 +34,19 @@ Get transform
 
 Always returns an object
 
-  $('#myDiv').css('transform') == {
-    rotate: 1.5707963267948966,
-    scale: [2,.5],
-    skew: [-0.7853981633974483, 1.0471975511965976]
-  };
+    $('#myDiv').css('transform') == {
+      rotate: 1.5707963267948966,
+      scale: [2,.5],
+      skew: [-0.7853981633974483, 1.0471975511965976]
+    };
 
 Utilities
 ---------
 
 degToRad and radToDeg methods available free of charge!
 
-  $.transform.degToRad(180) == Math.PI;
-  $.transform.radToDeg(Math.PI) == 180;
+    $.transform.degToRad(180) == Math.PI;
+    $.transform.radToDeg(Math.PI) == 180;
 
 **Performance tip**: try to work with radian directly!
 
