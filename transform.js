@@ -201,9 +201,6 @@ function addTransform(transform, origin) {
   }
 }
 
-function radToDeg( rad ) {
-  return rad * 180 / Math.PI;
-}
 function toRadian(value) {
   if( ~value.indexOf("deg") ) {
     return parseInt(value,10) * (Math.PI * 2 / 360);
@@ -215,7 +212,12 @@ function toRadian(value) {
 
 $.transform = {
   centerOrigin: 'margin',
-  radToDeg: radToDeg
+  radToDeg: function( rad ) {
+      return rad * 180 / Math.PI;
+    },
+  degToRad: function( deg ) {
+      return deg * Math.PI / 180 ;
+    }
 };
 
 })(jQuery);
