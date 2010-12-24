@@ -63,10 +63,10 @@ and **transforms are additive**, I already told it.
 Why no 'translate'?
 -------------------
 
-Because translate is unavailable in IE<9. 
-Emulating it requires to transparently wrap the target element in another element.
-Transparently messing with the DOM often introduces unpredictible behavior.
-Unpredictible behavior leads developpers to fear plugins.
+Because translate is unavailable in IE<9.  
+Emulating it requires to transparently wrap the target element in another element.  
+Transparently messing with the DOM often introduces unpredictible behavior.  
+Unpredictible behavior leads developpers to fear plugins.  
 *Fear leads to anger. Anger leads to hate. Hate leads to suffering.*
 
 If you want to translate your elements in a cross-browser way with minimal unpredictible behavior, wrap your elements yourself and use absolute positioning.
@@ -74,7 +74,7 @@ If you want to translate your elements in a cross-browser way with minimal unpre
 Why no 'matrix'?
 ----------------
 
-Because I don't need it, and I don't think I ever will, and I think you probably don't need it either. 
+Because I don't need it, and I don't think I ever will, and I think you probably don't need it either.   
 Pull requests are welcome, should you really need it.
 
 This additive behavior is annoying!
@@ -86,3 +86,5 @@ License
 =======
 
 Dual licensed under GPL and MIT licenses.
+
+Copyright (c) 2010 [Louis-Rémi Babé](http://twitter.com/louis_remi).
