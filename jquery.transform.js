@@ -61,10 +61,10 @@ $.cssHooks.transform = {
       var
         cos = Math.cos(rotate),
         sin = Math.sin(rotate),
-        tmp11 = cos*scale[0], // 1
-        tmp12 = -sin*scale[1], // tanX
-        tmp21 = sin*scale[0], // tanY
-        tmp22 = cos*scale[1], // 1
+        tmp11 = cos*scale[0],
+        tmp12 = -sin*scale[1],
+        tmp21 = sin*scale[0],
+        tmp22 = cos*scale[1],
         tanX,
         tanY;
         
