@@ -87,9 +87,10 @@ Alternatives
 
 The focus of this plugin is on ease-of-use, lightweightness and performances rather than being full-featured.
 Should you be unsatisfied with this philosophy (or the jQuery dependency), have a look at these alternatives:
--    [transform](https://github.com/heygrady/transform) Grady Kuhnline's jQuery plugin accepting *translate* and *matrix* transforms.
--    [Transformie](https://github.com/pbakaus/transformie) Paul Bakaus's library *"that brings you CSS Transforms by mapping the native IE Filter API to CSS transitions as proposed by Webkit"*.
--    [cssSandpaper](http://www.useragentman.com/blog/csssandpaper-a-css3-javascript-library/) Zoltan Du Lac's cross-browser CSS3 library.
+
+- [transform](https://github.com/heygrady/transform) Grady Kuhnline's jQuery plugin accepting *translate* and *matrix* transforms.
+- [Transformie](https://github.com/pbakaus/transformie) Paul Bakaus's library *"that brings you CSS Transforms by mapping the native IE Filter API to CSS transitions as proposed by Webkit"*.
+- [cssSandpaper](http://www.useragentman.com/blog/csssandpaper-a-css3-javascript-library/) Zoltan Du Lac's cross-browser CSS3 library.
 
 License
 =======
