@@ -3,8 +3,12 @@
  * 
  * limitations:
  * - requires jQuery 1.4.3+
- * - currently, only rotate, scale(X/Y) and skew(X/Y) are available 
- * - translate will never work in Internet Explorer versions prior to IE9
+ * - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE**.
+ * - the *matrix* property is not available
+ * - transformOrigin is not accessible
+ * 
+ * latest version and complete README available on Github:
+ * https://github.com/lrbabe/jquery.transform.js
  *
  * Copyright (c) 2010 Louis-Rémi Babé twitter.com/louis_remi
  * Licensed under the MIT license.
@@ -36,11 +40,8 @@ $.cssHooks.transform = {
     var _support = support,
       supportTransform = _support.transform,
       // add the value to the current transform
-      transform = overwrite? value : addTransform(value, $.data(elem, 'transform') || {
-          rotate: 0,
-          scale: [1,1],
-          skew: [0,0]
-        }),
+      transform = overwrite? value : addTransform(value, $.data(elem, 'transform')),
+      translate = transform.translate,
       rotate = transform.rotate,
       scale = transform.scale,
       skew = transform.skew;
@@ -50,12 +51,12 @@ $.cssHooks.transform = {
     
     // We can improve performance by avoiding unnecessary transforms
     // skew is the less likely to be used
-    if (skew == [0,0]) {
+    if (!skew[0] && !skew[1]) {
       skew = 0;
     }
-
+    
     if (supportTransform) {
-      elem.style[supportTransform] = 'rotate('+rotate+'rad) scale('+scale+')'+(skew?' skew('+skew[0]+'rad,'+skew[1]+'rad)' : '');
+      elem.style[supportTransform] = 'translate('+translate[0]+'px,'+translate[1]+'px) rotate('+rotate+'rad) scale('+scale+')'+(skew?' skew('+skew[0]+'rad,'+skew[1]+'rad)' : '');
 
     } else if (_support.matrixFilter) {
       var
@@ -88,15 +89,22 @@ $.cssHooks.transform = {
       ].join('');
       
       // From pbakaus's Transformie http://github.com/pbakaus/transformie
-      if(centerOrigin = $.transform.centerOrigin) {
+      if (centerOrigin = $.transform.centerOrigin) {
         elem.style[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + "px";
         elem.style[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + "px";
+      }
+      
+      // We assume that the elements are absolute positionned inside a relative positionned wrapper
+      if (translate != [0, 0]) {
+        elem.style.left = translate[0];
+        elem.style.top = translate[1];
       }
 
     }
   },
   get: function( elem, value ) {
     return $.data(elem, 'transform') || {
+      translate: [0,0],
       rotate: 0,
       scale: [1,1],
       skew: [0,0]
@@ -105,12 +113,8 @@ $.cssHooks.transform = {
 };
 $.fx.step.transform = function( fx ) {
   // fx.end and fx.start are not correctly initialised by jQuery, fix them once for all
-  if ( typeof fx.end === 'string' ) {
-    fx.end = addTransform(fx.end, {
-      rotate: 0,
-      scale: [1,1],
-      skew: [0,0]
-    });
+  if ( !fx.start ) {
+    fx.end = addTransform(fx.end);
     fx.start = $.cssHooks.transform.get(fx.elem, 'transform');
   }
   
@@ -119,6 +123,10 @@ $.fx.step.transform = function( fx ) {
     start = fx.start;
   
   $.cssHooks.transform.set( fx.elem, {
+    translate: [
+        start.translate[0] + pos * end.translate[0], 
+        start.translate[1] + pos * end.translate[1]
+      ],
     rotate: start.rotate + pos * end.rotate,
     scale: [
         // thanks http://louiseCunin.com for the maths
@@ -133,18 +141,26 @@ $.fx.step.transform = function( fx ) {
 };
 
 function addTransform(transform, origin) {
+  origin = origin || {
+    translate: [0,0],
+    rotate: 0,
+    scale: [1,1],
+    skew: [0,0]
+  };
+  var
+    translate = origin.translate,
+    rotate = origin.rotate,
+    scale = origin.scale,
+    skew = origin.skew,
+    i, trim, split, name, value;
   // We need to parse the transform string first
   if (typeof transform === 'string') {
   
     // split the != transforms
     transform = transform.split(') ');
   
-    var i = transform.length,
-      rotate = origin.rotate,
-      scale = origin.scale,
-      skew = origin.skew,
-      trim = $.trim,
-      split, name, value;
+    i = transform.length;
+    trim = $.trim;
   
     // add them to the origin
     while ( i-- ) {
@@ -152,7 +168,18 @@ function addTransform(transform, origin) {
       name = trim(split[0]);
       value = split[1];
       
-      if (name == 'rotate') {
+      if (name == 'translateX') {
+        translate[0] += parseInt(value, 10);
+  
+      } else if (name == 'translateY') {
+        translate[1] += parseInt(value, 10);
+  
+      } else if (name == 'translate') {
+        value = value.split(',');
+        translate[0] += parseInt(value[0], 10);
+        translate[1] += parseInt(value[1] || 0, 10);
+  
+      } else if (name == 'rotate') {
         rotate += toRadian(value);
   
       } else if (name == 'scaleX') {
@@ -175,30 +202,34 @@ function addTransform(transform, origin) {
       } else if (name == 'skew') {
         value = value.split(',');
         skew[0] += toRadian(value[0]);
-        skew[1] += toRadian(value.length>1? value[1] : value[0]);
+        skew[1] += toRadian(value[1] || 0);
   
       }
     }
-    return {
-      rotate: rotate,
-      scale: scale,
-      skew: skew
-    };
   
-  // transforms are ready for addition
+  // transform is an object
   } else {
-    return {
-      rotate: origin.rotate + transform.rotate,
-      scale: [
-          origin.scale[0] + transform.scale[0],
-          origin.scale[1] + transform.scale[1]
-        ],
-      skew: [
-          origin.skew[0] + transform.skew[0],
-          origin.skew[1] + transform.skew[1]
-        ]
+    if (transform.translate) {
+      translate[0] += transform.translate[0];
+      translate[1] += transform.translate[1];
+    }
+    origin.rotate += (transform.rotate || 0);
+    if (transform.scale) {
+      scale[0] *= transform.scale[0];
+      scale[1] *= transform.scale[1];
+    }
+    if (transform.skew) {
+      skew[0] += transform.skew[0];
+      skew[1] += transform.skew[1];
     }
   }
+  
+  return {
+    translate: translate,
+    rotate: rotate,
+    scale: scale,
+    skew: skew
+  };
 }
 
 function toRadian(value) {
