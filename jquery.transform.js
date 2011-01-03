@@ -183,15 +183,15 @@ function addTransform(transform, origin) {
         rotate += toRadian(value);
   
       } else if (name == 'scaleX') {
-        scale[0] *= parseFloat(value);
+        scale[0] *= value;
   
       } else if (name == 'scaleY') {
-        scale[1] *= parseFloat(value);
+        scale[1] *= value;
   
       } else if (name == 'scale') {
         value = value.split(',');
-        scale[0] *= parseFloat(value[0]);
-        scale[1] *= parseFloat(value.length>1? value[1] : value[0]);
+        scale[0] *= value[0];
+        scale[1] *= (value.length>1? value[1] : value[0]);
   
       } else if (name == 'skewX') {
         skew[0] += toRadian(value);

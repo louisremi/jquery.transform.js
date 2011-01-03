@@ -12,7 +12,7 @@ Set transform with a string
     $('#myDiv').css('transform', 'rotate(25deg) scale(2)');
     $('#myDiv').css('transform', 'rotate(65deg) scale(3)');
 
-The previous two lines result in #myDiv being 25+65=90deg and 2x3=6 times bigger.
+The previous two lines result in #myDiv being 90deg (25+65) and 6 times (2x3) bigger.
 
 Set transform with an object
 ----------------------------
@@ -56,7 +56,7 @@ degToRad and radToDeg methods available free of charge!
 
 **Performance tip**: try to work with radian directly!
 
-    // Dear maintainer, the following is equivalent to 45deg clockwise rotation of #myDiv, hope you get the rest.
+    // Dear maintainer, the following is equivalent to 90deg clockwise rotation of #myDiv, hope you get the rest.
     $('#myDiv').css('transform', {rotate: Math.PI/2});
 
 Limitations:
