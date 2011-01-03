@@ -213,7 +213,7 @@ function addTransform(transform, origin) {
       translate[0] += transform.translate[0];
       translate[1] += transform.translate[1];
     }
-    origin.rotate += (transform.rotate || 0);
+    rotate += (transform.rotate || 0);
     if (transform.scale) {
       scale[0] *= transform.scale[0];
       scale[1] *= transform.scale[1];
