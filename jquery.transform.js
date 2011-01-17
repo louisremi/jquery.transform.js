@@ -19,13 +19,14 @@ div = null;
 
 $.cssNumber.transform = true;
 // additive transform
+if (support.transform != 'transform')
 $.cssHooks.transform = {
   set: function( elem, value ) {
     var _support = support,
       supportTransform = _support.transform;
 
     // TODO: parse transformation string to keep track of each transform property
-    if (supportTransform && supportTransform != 'transform') {
+    if (supportTransform) {
       elem.style[supportTransform] = value;
 
     } else if (_support.matrixFilter) {
@@ -36,7 +37,7 @@ $.cssHooks.transform = {
     var _support = support,
       supportTransform = _support.transform;
 
-    if (supportTransform && supportTransform != 'transform') {
+    if (supportTransform) {
       return window.getComputedStyle(elem)[supportTransform];
 
     } else if (_support.matrixFilter) {
