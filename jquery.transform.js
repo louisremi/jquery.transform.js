@@ -19,7 +19,7 @@ div = null;
 
 $.cssNumber.transform = true;
 // additive transform
-if (support.transform != 'transform')
+//if (support.transform != 'transform')
 $.cssHooks.transform = {
   set: function( elem, value ) {
     var _support = support,
@@ -29,9 +29,9 @@ $.cssHooks.transform = {
     if (supportTransform) {
       elem.style[supportTransform] = value;
 
-    } else if (_support.matrixFilter) {
+    } /*else if (_support.matrixFilter) {
       
-    }
+    }*/
   },
   get: function( elem, value ) {
     var _support = support,
@@ -40,9 +40,11 @@ $.cssHooks.transform = {
     if (supportTransform) {
       return window.getComputedStyle(elem)[supportTransform];
 
-    } else if (_support.matrixFilter) {
+    } /*else if (_support.matrixFilter) {
       
-    }
+    }*/
   },
-  affectedProperty: support.transform
+  affectedProperty: support.transition
 }
+
+})(jQuery);
