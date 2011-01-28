@@ -3,7 +3,7 @@
  */
 (function($) {
 
-var 
+var
 		div = document.createElement('div')
   , divStyle = div.style
   , support = $.support
@@ -12,7 +12,7 @@ var
 support.transform = 
   divStyle.MozTransform === '' ? 'MozTransform':
   divStyle.MsTransform === '' ? 'MsTransform':
-  divStyle.WebkitTransform === '' ? 'WebkitTransform': 
+  divStyle.WebkitTransform === '' ? 'WebkitTransform':
   divStyle.OTransform === '' ? 'OTransform':
   divStyle.transform === '' ? 'transform':
   false;
@@ -25,8 +25,10 @@ $.cssNumber.transform = true;
 if ( support.transform != 'transform' ) {
 	$.cssHooks.transform = {
 	  set: function( elem, value ) {
-	    var _support = support,
-	      supportTransform = _support.transform;
+	    var
+	    		_support = support
+	      , supportTransform = _support.transform
+	      ;
 
 	    if (supportTransform) {
 	      elem.style[supportTransform] = value;
@@ -136,14 +138,16 @@ if ( support.transform != 'transform' ) {
 	    }
 	  },
 	  get: function( elem, computed ) {
-	    var _support = support,
-	      supportTransform = _support.transform;
+	    var
+	    		_support = support
+	      , supportTransform = _support.transform
+	      ;
 
 	    if (supportTransform) {
 	      return (computed ? getComputedStyle(elem) : elem.style)[supportTransform];
 
 	    } else if (_support.matrixFilter) {
-	    	var 
+	    	var
 	    			elemStyle = computed && elem.currentStyle ? elem.currentStyle : elem.style
 	    		, matrix
 	    		;
@@ -168,7 +172,7 @@ if ( support.transform != 'transform' ) {
 }
 
 $.fx.step.transform = function( fx ) {
-  var 
+  var
   		transformHook = $.cssHooks.transform
   	, elem = fx.elem
   	, start = fx.start
