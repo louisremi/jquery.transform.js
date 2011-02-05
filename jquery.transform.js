@@ -7,6 +7,7 @@ var
 		div = document.createElement('div')
 	, divStyle = div.style
 	, support = $.support
+	, pxInMatrix
 	;
 
 support.transform = 
@@ -17,6 +18,8 @@ support.transform =
 	divStyle.transform === '' ? 'transform':
 	false;
 support.matrixFilter = !support.transform && divStyle.filter === '';
+// Firefox requires and adds px unit to translate components of 'matrix(...)'
+pxInMatrix = divStyle.MozTransform === '';
 // prevent IE memory leak
 div = null;
 
@@ -31,7 +34,10 @@ if ( support.transform != 'transform' ) {
 				;
 
 			if (supportTransform) {
-				elem.style[supportTransform] = value;
+				// add px to translate components of 'matrix(...)' if necessary
+				elem.style[supportTransform] = pxInMatrix && /matrix[^)p]*\)/.test(value) ?
+					value.replace(/matrix((?:[^,]*,){4})([^,]*),([^)]*)/, 'matrix$1$2px,$3px'):
+					value;
 
 			// IE678 matrix filter version
 			} else if (_support.matrixFilter) {
@@ -62,7 +68,7 @@ if ( support.transform != 'transform' ) {
 				;
 
 			if (supportTransform) {
-				return (computed ? getComputedStyle(elem) : elem.style)[supportTransform];
+				return (computed ? getComputedStyle(elem) : elem.style)[supportTransform].split('px').join();
 			
 			} else if (_support.matrixFilter) {
 				var
