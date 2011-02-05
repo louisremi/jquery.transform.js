@@ -96,6 +96,7 @@ $.fx.step.transform = function( fx ) {
 		, end = fx.end
 		, pos = fx.pos
 		, transform = ''
+		, prop
 		;
 
 	// fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
@@ -106,29 +107,26 @@ $.fx.step.transform = function( fx ) {
 			start = $.cssHooks.transform.get(elem, true);
 		}
 		// start is either 'none' or a matrix(...) that has to be parsed
-		fx.start = start = unmatrix(start == 'none'? [1,0,0,1,0,0] : toArray(start));
-		// end is either a transform string or an object of transform components
-		fx.end = end = typeof end === 'string' ?
-			unmatrix(matrix(end)):
-			$.extend({
-				translate: [0, 0],
+		fx.start = start = start == 'none'?
+			{
+				translate: [0,0],
 				rotate: 0,
-				scale: [1, 1],
-				skew: [0, 0]
-			}, end);
+				scale: [1,1],
+				skew: [0,0]
+			}:
+			unmatrix( toArray(start) );
+
+		// fx.end has to be parsed and decompose as long as we have no animation hook 
+		fx.end = end = unmatrix(matrix(end));
 
 		// get rid of properties that do not change
-		if ( start.translate[0] == end.translate[0] && start.translate[1] == end.translate[1] ) {
-			delete start.translate;
-		}
-		if ( start.rotate == end.rotate ) {
-			delete start.rotate;
-		}
-		if ( start.scale[0] == end.scale[0] && start.scale[1] == end.scale[1] ) {
-			delete start.scale;
-		}
-		if ( start.skew[0] == end.skew[0] && start.skew[1] == end.skew[1] ) {
-			delete start.skew;
+		for ( prop in start) {
+			if ( prop == 'rotate' ?
+				start[prop] == end[prop]:
+				start[prop][0] == end[prop][0] && start[prop][1] == end[prop][1]
+			) {
+				delete start[prop];
+			}
 		}
 	}
 
