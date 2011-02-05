@@ -5,17 +5,17 @@
 
 var
 		div = document.createElement('div')
-  , divStyle = div.style
-  , support = $.support
-  ;
+	, divStyle = div.style
+	, support = $.support
+	;
 
 support.transform = 
-  divStyle.MozTransform === '' ? 'MozTransform':
-  divStyle.msTransform === '' ? 'msTransform':
-  divStyle.WebkitTransform === '' ? 'WebkitTransform':
-  divStyle.OTransform === '' ? 'OTransform':
-  divStyle.transform === '' ? 'transform':
-  false;
+	divStyle.MozTransform === '' ? 'MozTransform':
+	divStyle.msTransform === '' ? 'msTransform':
+	divStyle.WebkitTransform === '' ? 'WebkitTransform':
+	divStyle.OTransform === '' ? 'OTransform':
+	divStyle.transform === '' ? 'transform':
+	false;
 support.matrixFilter = !support.transform && divStyle.filter === '';
 // prevent IE memory leak
 div = null;
@@ -24,99 +24,99 @@ $.cssNumber.transform = true;
 
 if ( support.transform != 'transform' ) {
 	$.cssHooks.transform = {
-	  set: function( elem, value ) {
-	  	var
-	    		_support = support
-	      , supportTransform = _support.transform
-	      ;
+		set: function( elem, value ) {
+			var
+					_support = support
+				, supportTransform = _support.transform
+				;
 
-	    if (supportTransform) {
-	      elem.style[supportTransform] = value;
+			if (supportTransform) {
+				elem.style[supportTransform] = value;
 
 			// IE678 matrix filter version
-	    } else if (_support.matrixFilter) {
-	      value = matrix(value);
-	      elem.style.filter = [
-	        "progid:DXImageTransform.Microsoft.Matrix(",
-	          "M11="+value[0]+",",
-	          "M12="+value[2]+",",
-	          "M21="+value[1]+",",
-	          "M22="+value[3]+",",
-	          "SizingMethod='auto expand'",
-	        ")"
-	      ].join('');
-	      // From pbakaus's Transformie http://github.com/pbakaus/transformie
-	      if (centerOrigin = $.transform.centerOrigin) {
-	        elem.style[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
-	        elem.style[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
-	      }
-	      // We assume that the elements are absolute positionned inside a relative positionned wrapper
-	      elem.style.left = value[4] + 'px';
-	      elem.style.top = value[5] + 'px';
-	    }
-	  },
-	  get: function( elem, computed ) {
-	    var
-	    		_support = support
-	      , supportTransform = _support.transform
-	      ;
+			} else if (_support.matrixFilter) {
+				value = matrix(value);
+				elem.style.filter = [
+					"progid:DXImageTransform.Microsoft.Matrix(",
+						"M11="+value[0]+",",
+						"M12="+value[2]+",",
+						"M21="+value[1]+",",
+						"M22="+value[3]+",",
+						"SizingMethod='auto expand'",
+					")"
+				].join('');
+				// From pbakaus's Transformie http://github.com/pbakaus/transformie
+				if (centerOrigin = $.transform.centerOrigin) {
+					elem.style[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
+					elem.style[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
+				}
+				// We assume that the elements are absolute positionned inside a relative positionned wrapper
+				elem.style.left = value[4] + 'px';
+				elem.style.top = value[5] + 'px';
+			}
+		},
+		get: function( elem, computed ) {
+			var
+					_support = support
+				, supportTransform = _support.transform
+				;
 
-	    if (supportTransform) {
-	      return (computed ? getComputedStyle(elem) : elem.style)[supportTransform];
-
-	    } else if (_support.matrixFilter) {
-	    	var
-	    			elemStyle = computed && elem.currentStyle ? elem.currentStyle : elem.style
-	    		, matrix
-	    		;
-	    	if ( elemStyle && /Matrix=([^)]*)/.test(elemStyle) ) {
-	    		matrix = RegExp.$1.split(',');
-	    		matrix = [
-	    			matrix[0].split('=')[1],
-	    			matrix[2].split('=')[1],
-	    			matrix[1].split('=')[1],
-	    			matrix[3].split('=')[1]
-	    		];
-	    	} else {
-	    		matrix = [0,0,0,0];
-	    	}
-	    	matrix[4] = elemStyle ? elemStyle.left : 0;
-	    	matrix[5] = elemStyle ? elemStyle.top : 0;
-	    	return "matrix(" + matrix + ")";
-	    }
-	  },
-	  affectedProperty: support.transition
+			if (supportTransform) {
+				return (computed ? getComputedStyle(elem) : elem.style)[supportTransform];
+			
+			} else if (_support.matrixFilter) {
+				var
+						elemStyle = computed && elem.currentStyle ? elem.currentStyle : elem.style
+					, matrix
+					;
+				if ( elemStyle && /Matrix=([^)]*)/.test(elemStyle) ) {
+					matrix = RegExp.$1.split(',');
+					matrix = [
+						matrix[0].split('=')[1],
+						matrix[2].split('=')[1],
+						matrix[1].split('=')[1],
+						matrix[3].split('=')[1]
+					];
+				} else {
+					matrix = [0,0,0,0];
+				}
+				matrix[4] = elemStyle ? elemStyle.left : 0;
+				matrix[5] = elemStyle ? elemStyle.top : 0;
+				return "matrix(" + matrix + ")";
+			}
+		},
+		affectedProperty: support.transition
 	}
 }
 
 $.fx.step.transform = function( fx ) {
-  var
-  		elem = fx.elem
-  	, start = fx.start
-  	, end = fx.end
-  	, pos = fx.pos
+	var
+			elem = fx.elem
+		, start = fx.start
+		, end = fx.end
+		, pos = fx.pos
 		, transform = ''
-  	;
-  
-  // fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
-  // so that we can interpolate them
-  if ( !start || typeof start === "string" ) {
-  	// $.fx.prototype.cur is still broken in 1.5, see #7912
-  	if (!start) {
-  		start = $.cssHooks.transform.get(elem, true);
-  	}
-  	// start is either 'none' or a matrix(...) that has to be parsed
-  	fx.start = start = unmatrix(start == 'none'? [1,0,0,1,0,0] : toArray(start));
-  	// end is either a transform string or an object of transform components
-  	fx.end = end = typeof end === 'string' ?
-  		unmatrix(matrix(end)):
-  		$.extend({
-  			translate: [0, 0],
-  			rotate: 0,
-  			scale: [1, 1],
-  			skew: [0, 0]
-  		}, end);
-		
+		;
+
+	// fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
+	// so that we can interpolate them
+	if ( !start || typeof start === "string" ) {
+		// $.fx.prototype.cur is still broken in 1.5, see #7912
+		if (!start) {
+			start = $.cssHooks.transform.get(elem, true);
+		}
+		// start is either 'none' or a matrix(...) that has to be parsed
+		fx.start = start = unmatrix(start == 'none'? [1,0,0,1,0,0] : toArray(start));
+		// end is either a transform string or an object of transform components
+		fx.end = end = typeof end === 'string' ?
+			unmatrix(matrix(end)):
+			$.extend({
+				translate: [0, 0],
+				rotate: 0,
+				scale: [1, 1],
+				skew: [0, 0]
+			}, end);
+
 		// get rid of properties that do not change
 		if ( start.translate[0] == end.translate[0] && start.translate[1] == end.translate[1] ) {
 			delete start.translate;
@@ -130,8 +130,8 @@ $.fx.step.transform = function( fx ) {
 		if ( start.skew[0] == end.skew[0] && start.skew[1] == end.skew[1] ) {
 			delete start.skew;
 		}
-  }
-	
+	}
+
 	/*
 	 * We want a fast interpolation algorithm.
 	 * This implies avoiding function calls and sacrifying DRY principle:
@@ -183,74 +183,74 @@ function matrix( transform ) {
 	// Loop through the transform properties, parse and multiply them
 	while (i--) {
 		split = transform[i].split('(');
-	  prop = trim(split[0]);
-	  val = split[1];
-	  A_ = B_ = C_ = D_ = 0;
+		prop = trim(split[0]);
+		val = split[1];
+		A_ = B_ = C_ = D_ = 0;
 		// switch is not a good idea in js, perf. wise
 		if ( prop == 'translateX' ) {
-	    X += parseInt(val, 10);
-	    continue;
-	
-	  } else if ( prop == 'translateY' ) {
-	    Y += parseInt(val, 10);
-	    continue;
-	
-	  } else if ( prop == 'translate' ) {
-	    val = val.split(',');
-	    X += parseInt(val[0], 10);
-	    Y += parseInt(val[1] || 0, 10);
-	    continue;
-	
-	  } else if ( prop == 'rotate' ) {
-	    val = toRadian(val);
-	    A_ = Math.cos(val);
-	    B_ = Math.sin(val);
-	    C_ = -Math.sin(val);
-	    D_ = Math.cos(val);
-	
-	  } else if ( prop == 'scaleX' ) {
-	    A_ = val;
-	    D_ = 1;
-	
-	  } else if ( prop == 'scaleY' ) {
-	    A_ = 1;
-	    D_ = val;
-	
-	  } else if ( prop == 'scale' ) {
-	    val = val.split(',');
-	    A_ = val[0];
-	    D_ = val.length>1 ? val[1] : val[0];
-	
-	  } else if ( prop == 'skewX' ) {
-	    A_ = D_ = 1;
-	    C_ = Math.tan(toRadian(val));
-	
-	  } else if ( prop == 'skewY' ) {
-	  	A_ = D_ = 1;
-	    B_ = Math.tan(toRadian(val));
-	
-	  } else if ( prop == 'skew' ) {
-	  	A_ = D_ = 1;
-	    val = val.split(',');
-	    C_ = Math.tan(toRadian(val[0]));
-	    B_ = Math.tan(toRadian(val[1] || 0));
-	
-	  } else if ( prop == 'matrix' ) {
-	  	val = val.split(',');
-	  	A_ = +val[0];
-	  	B_ = +val[1];
-	  	C_ = +val[2];
-	  	D_ = +val[3];
-	  	X += parseInt(val[4], 10);
-	    Y += parseInt(val[5], 10);
-	  }
-	  // Matrix product
-	  tmp1 = A * A_ + B * C_;
-	  B    = A * B_ + B * D_;
-	  tmp2 = C * A_ + D * C_;
-	  D    = C * B_ + D * D_;
-	  A = tmp1;
-	  C = tmp2;
+			X += parseInt(val, 10);
+			continue;
+
+		} else if ( prop == 'translateY' ) {
+			Y += parseInt(val, 10);
+			continue;
+
+		} else if ( prop == 'translate' ) {
+			val = val.split(',');
+			X += parseInt(val[0], 10);
+			Y += parseInt(val[1] || 0, 10);
+			continue;
+
+		} else if ( prop == 'rotate' ) {
+			val = toRadian(val);
+			A_ = Math.cos(val);
+			B_ = Math.sin(val);
+			C_ = -Math.sin(val);
+			D_ = Math.cos(val);
+
+		} else if ( prop == 'scaleX' ) {
+			A_ = val;
+			D_ = 1;
+
+		} else if ( prop == 'scaleY' ) {
+			A_ = 1;
+			D_ = val;
+
+		} else if ( prop == 'scale' ) {
+			val = val.split(',');
+			A_ = val[0];
+			D_ = val.length>1 ? val[1] : val[0];
+
+		} else if ( prop == 'skewX' ) {
+			A_ = D_ = 1;
+			C_ = Math.tan(toRadian(val));
+
+		} else if ( prop == 'skewY' ) {
+			A_ = D_ = 1;
+			B_ = Math.tan(toRadian(val));
+
+		} else if ( prop == 'skew' ) {
+			A_ = D_ = 1;
+			val = val.split(',');
+			C_ = Math.tan(toRadian(val[0]));
+			B_ = Math.tan(toRadian(val[1] || 0));
+
+		} else if ( prop == 'matrix' ) {
+			val = val.split(',');
+			A_ = +val[0];
+			B_ = +val[1];
+			C_ = +val[2];
+			D_ = +val[3];
+			X += parseInt(val[4], 10);
+			Y += parseInt(val[5], 10);
+		}
+		// Matrix product
+		tmp1 = A * A_ + B * C_;
+		B    = A * B_ + B * D_;
+		tmp2 = C * A_ + D * C_;
+		D    = C * B_ + D * D_;
+		A = tmp1;
+		C = tmp2;
 	}
 	return [A,B,C,D,X,Y];
 }
@@ -294,7 +294,7 @@ function unmatrix(matrix) {
 			skew = -skew;
 			scaleX = -scaleX;
 		}
-	
+
 	// matrix is singular and cannot be interpolated
 	} else {
 		rotate = scaleX = scaleY = skew = 0;
@@ -310,11 +310,11 @@ function unmatrix(matrix) {
 
 // converts an angle string in any unit to a radian Float
 function toRadian(value) {
-  return ~value.indexOf('deg') ?
-  	parseInt(value,10) * (Math.PI * 2 / 360):
-  	~value.indexOf('grad') ?
-  		parseInt(value,10) * (Math.PI/200):
-  		parseFloat(value);
+	return ~value.indexOf('deg') ?
+		parseInt(value,10) * (Math.PI * 2 / 360):
+		~value.indexOf('grad') ?
+			parseInt(value,10) * (Math.PI/200):
+			parseFloat(value);
 }
 // Converts 'matrix(A,B,C,D,X,Y)' to [A,B,C,D,X,Y]
 function toArray(matrix) {
@@ -325,8 +325,8 @@ function toArray(matrix) {
 
 
 $.transform = {
-  centerOrigin: 'margin',
-  matrix: matrix
+	centerOrigin: 'margin',
+	matrix: matrix
 };
 
 })(jQuery);
