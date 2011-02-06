@@ -205,63 +205,71 @@ function matrix( transform ) {
 		prop = trim(split[0]);
 		val = split[1];
 		A_ = B_ = C_ = D_ = 0;
-		// switch is not a good idea in js, perf. wise
-		if ( prop == 'translateX' ) {
-			X += parseInt(val, 10);
-			continue;
 
-		} else if ( prop == 'translateY' ) {
-			Y += parseInt(val, 10);
-			continue;
+		switch (prop) {
+			case 'translateX':
+				X += parseInt(val, 10);
+				continue;
 
-		} else if ( prop == 'translate' ) {
-			val = val.split(',');
-			X += parseInt(val[0], 10);
-			Y += parseInt(val[1] || 0, 10);
-			continue;
+			case 'translateY':
+				Y += parseInt(val, 10);
+				continue;
 
-		} else if ( prop == 'rotate' ) {
-			val = toRadian(val);
-			A_ = Math.cos(val);
-			B_ = Math.sin(val);
-			C_ = -Math.sin(val);
-			D_ = Math.cos(val);
+			case 'translate':
+				val = val.split(',');
+				X += parseInt(val[0], 10);
+				Y += parseInt(val[1] || 0, 10);
+				continue;
 
-		} else if ( prop == 'scaleX' ) {
-			A_ = val;
-			D_ = 1;
+			case 'rotate':
+				val = toRadian(val);
+				A_ = Math.cos(val);
+				B_ = Math.sin(val);
+				C_ = -Math.sin(val);
+				D_ = Math.cos(val);
+				break;
 
-		} else if ( prop == 'scaleY' ) {
-			A_ = 1;
-			D_ = val;
+			case 'scaleX':
+				A_ = val;
+				D_ = 1;
+				break;
 
-		} else if ( prop == 'scale' ) {
-			val = val.split(',');
-			A_ = val[0];
-			D_ = val.length>1 ? val[1] : val[0];
+			case 'scaleY':
+				A_ = 1;
+				D_ = val;
+				break;
 
-		} else if ( prop == 'skewX' ) {
-			A_ = D_ = 1;
-			C_ = Math.tan(toRadian(val));
+			case 'scale':
+				val = val.split(',');
+				A_ = val[0];
+				D_ = val.length>1 ? val[1] : val[0];
+				break;
 
-		} else if ( prop == 'skewY' ) {
-			A_ = D_ = 1;
-			B_ = Math.tan(toRadian(val));
+			case 'skewX':
+				A_ = D_ = 1;
+				C_ = Math.tan(toRadian(val));
+				break;
 
-		} else if ( prop == 'skew' ) {
-			A_ = D_ = 1;
-			val = val.split(',');
-			C_ = Math.tan(toRadian(val[0]));
-			B_ = Math.tan(toRadian(val[1] || 0));
+			case 'skewY':
+				A_ = D_ = 1;
+				B_ = Math.tan(toRadian(val));
+				break;
 
-		} else if ( prop == 'matrix' ) {
-			val = val.split(',');
-			A_ = +val[0];
-			B_ = +val[1];
-			C_ = +val[2];
-			D_ = +val[3];
-			X += parseInt(val[4], 10);
-			Y += parseInt(val[5], 10);
+			case 'skew':
+				A_ = D_ = 1;
+				val = val.split(',');
+				C_ = Math.tan(toRadian(val[0]));
+				B_ = Math.tan(toRadian(val[1] || 0));
+				break;
+
+			case 'matrix':
+				val = val.split(',');
+				A_ = +val[0];
+				B_ = +val[1];
+				C_ = +val[2];
+				D_ = +val[3];
+				X += parseInt(val[4], 10);
+				Y += parseInt(val[5], 10);
 		}
 		// Matrix product
 		tmp1 = A * A_ + B * C_;
@@ -333,13 +341,13 @@ function toRadian(value) {
 			parseInt(value,10) * (Math.PI/200):
 			parseFloat(value);
 }
+
 // Converts 'matrix(A,B,C,D,X,Y)' to [A,B,C,D,X,Y]
 function toArray(matrix) {
 	// Fremove the unit of X and Y for Firefox
 	matrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/.exec(matrix);
 	return [matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]];
 }
-
 
 $.transform = {
 	centerOrigin: 'margin'
