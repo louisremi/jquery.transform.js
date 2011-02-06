@@ -38,11 +38,16 @@ I prefer leaving this up to you.
 What changed since 1.0?
 =======================
 
-The additive behavior of the library has been removed to increase consistency with jQuery css API.
+The additive behavior of the plugin has been removed to be consistent with jQuery css API.
 Inorder to add transforms to the current state of an element, one would now have to do
 
     $('#myDiv').css('transform', $('#myDiv').css('transform') + ' rotate(90deg)');
 
+It is now possible to use 'matrix(...)' accross the API.
+This allows to build precise transforms using http://www.useragentman.com/matrix/ for instance.
+
+The plugin is now compatible with transforms set in <style> tags and through other libraries.
+This was also required to make it compatible with a CSS3 Transitions enhanced jQuery.
 
 License
 =======
