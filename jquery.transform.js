@@ -169,7 +169,7 @@ $.fx.step.transform = function( fx ) {
 
 // turns a transform string into its 'matrix(A,B,C,D,X,Y)' form (as an array, though)
 function matrix( transform ) {
-	transform = (transform + ' ').split(') ');
+	transform = transform.split(')');
 	var
 			trim = $.trim
 		// last element of the array is an empty string, get rid of it
