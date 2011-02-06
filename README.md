@@ -39,7 +39,7 @@ What changed since 1.0?
 =======================
 
 The additive behavior of the plugin has been removed to be consistent with jQuery css API.
-Inorder to add transforms to the current state of an element, one would now have to do
+In order to add transforms to the current state of an element, one would now have to do
 
     $('#myDiv').css('transform', $('#myDiv').css('transform') + ' rotate(90deg)');
 

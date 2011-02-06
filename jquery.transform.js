@@ -1,5 +1,20 @@
 /*
- * Quick rewrite of jquery.transform.js to make it compatible with jquery.transition.js
+ * transform: A jQuery cssHooks adding a cross browser transform property to $.fn.css() and $.fn.animate()
+ * 
+ * limitations:
+ * - requires jQuery 1.4.3+
+ * - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE**.
+ * - transformOrigin is not accessible
+ * 
+ * latest version and complete README available on Github:
+ * https://github.com/lrbabe/jquery.transform.js
+ *
+ * Copyright (c) 2010 Louis-Remi Babe twitter.com/louis_remi
+ * Licensed under the MIT license.
+ * 
+ * This saved you an hour of work? 
+ * Send me music http://www.amazon.fr/wishlist/HNTU0468LQON
+ *
  */
 (function($) {
 
