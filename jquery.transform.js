@@ -36,7 +36,7 @@ support.matrixFilter = !support.transform && divStyle.filter === '';
 // Firefox requires and adds px unit to translate components of 'matrix(...)'
 pxInMatrix = divStyle.MozTransform === '';
 // prevent IE memory leak
-div = null;
+div = divStyle = null;
 
 $.cssNumber.transform = true;
 
