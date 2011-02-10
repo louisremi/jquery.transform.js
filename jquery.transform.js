@@ -9,11 +9,11 @@
  * latest version and complete README available on Github:
  * https://github.com/lrbabe/jquery.transform.js
  *
- * Copyright (c) 2010 Louis-Remi Babe twitter.com/louis_remi
+ * Copyright 2011 @louis_remi
  * Licensed under the MIT license.
  *
  * This saved you an hour of work?
- * Send me music http://www.amazon.fr/wishlist/HNTU0468LQON
+ * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  *
  */
 (function($) {
