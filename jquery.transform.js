@@ -106,7 +106,7 @@ if ( support.transform != 'transform' ) {
 				return "matrix(" + matrix + ")";
 			}
 		},
-		affectedProperty: support.transition
+		realProperty: support.transform
 	}
 }
 
