@@ -3,7 +3,7 @@
  *
  * limitations:
  * - requires jQuery 1.4.3+
- * - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE**.
+ * - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE678**.
  * - transformOrigin is not accessible
  *
  * latest version and complete README available on Github:
@@ -16,117 +16,162 @@
  * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  *
  */
-(function($) {
+(function( $ ) {
 
-var
-		div = document.createElement('div')
-	, divStyle = div.style
-	, support = $.support
-	, pxInMatrix
-	;
+/*
+ * Feature tests and global variables
+ */
+var div = document.createElement('div'),
+	divStyle = div.style,
+	propertyName = 'transform',
+	suffix = propertyName[0].toUpperCase() + propertyName.slice(1),
+	testProperties = [
+		'O' + suffix,
+		'ms' + suffix,
+		'Webkit' + suffix,
+		'Moz' + suffix,
+		// prefix-less property
+		propertyName
+	],
+	i = testProperties.length,
+	supportProperty,
+	supportMatrixFilter,
+	propertyHook;
 
-support.transform = 
-	divStyle.MozTransform === '' ? 'MozTransform':
-	divStyle.msTransform === '' ? 'msTransform':
-	divStyle.WebkitTransform === '' ? 'WebkitTransform':
-	divStyle.OTransform === '' ? 'OTransform':
-	divStyle.transform === '' ? 'transform':
-	false;
-support.matrixFilter = !support.transform && divStyle.filter === '';
-// Firefox requires and adds px unit to translate components of 'matrix(...)'
-pxInMatrix = divStyle.MozTransform === '';
+// test different vendor prefixes of this property
+while ( i-- ) {
+	if ( testProperties[i] in divStyle ) {
+		$.support[propertyName] = supportProperty = testProperties[i];
+		continue;
+	}
+}
+// IE678 alternative
+if ( !supportProperty ) {
+	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === '';
+}
 // prevent IE memory leak
 div = divStyle = null;
 
-$.cssNumber.transform = true;
+// px isn't the default unit of this property
+$.cssNumber[propertyName] = true;
 
-if ( support.transform != 'transform' ) {
-	$.cssHooks.transform = {
-		set: function( elem, value ) {
-			var
-					_support = support
-				, supportTransform = _support.transform
-				;
-
-			if (supportTransform) {
-				// add px to translate components of 'matrix(...)' if necessary
-				elem.style[supportTransform] = pxInMatrix && /matrix[^)p]*\)/.test(value) ?
+/*
+ * fn.css() hooks
+ */
+if ( supportProperty ) {
+	// Modern browsers can use jQuery.cssProps as a basic hook
+	$.cssProps[propertyName] = supportProperty;
+	
+	// Firefox needs a complete hook because it stuffs matrix with 'px'
+	if ( supportProperty == 'Moz' + suffix ) {
+		propertyHook = {
+			get: function( elem, computed ) {
+				return (computed ?
+					// remove 'px' from the computed matrix
+					$.css( elem, supportProperty ).split('px').join(''):
+					elem.style[supportProperty]
+				)
+			},
+			set: function( elem, value ) {
+				// remove 'px' from matrices
+				elem.style[supportProperty] = /matrix[^)p]*\)/.test(value) ?
 					value.replace(/matrix((?:[^,]*,){4})([^,]*),([^)]*)/, 'matrix$1$2px,$3px'):
 					value;
-
-			// IE678 matrix filter version
-			} else if (_support.matrixFilter) {
-				value = matrix(value);
-				elem.style.filter = [
-					"progid:DXImageTransform.Microsoft.Matrix(",
-						"M11="+value[0]+",",
-						"M12="+value[2]+",",
-						"M21="+value[1]+",",
-						"M22="+value[3]+",",
-						"SizingMethod='auto expand'",
-					")"
-				].join('');
-				// From pbakaus's Transformie http://github.com/pbakaus/transformie
-				if (centerOrigin = $.transform.centerOrigin) {
-					elem.style[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
-					elem.style[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
-				}
-				// We assume that the elements are absolute positionned inside a relative positionned wrapper
-				elem.style.left = value[4] + 'px';
-				elem.style.top = value[5] + 'px';
 			}
-		},
+		}
+	// rupper is not yet fixed in jQuery 1.5.1 for IE9, see http://jqbug.com/8346
+	} else if ( supportProperty == 'ms' + suffix ) {
+		propertyHook = {
+			get: function( elem, computed ) {
+				return (computed ?
+					$.css( elem, 'MsTransform' ):
+					elem.style[supportProperty]
+				)
+			}
+		}
+	}
+	/* TODO: leverage hardware acceleration of 3d transform in Webkit only
+	else if ( supportProperty == 'Webkit' + suffix && support3dTransform ) {
+		propertyHook = {
+			set: function( elem, value ) {
+				elem.style[supportProperty] = 
+					value.replace();
+			}
+		}
+	}*/
+	
+} else if ( supportMatrixFilter ) {
+	propertyHook = {
 		get: function( elem, computed ) {
-			var
-					_support = support
-				, supportTransform = _support.transform
-				;
+			var elemStyle = elem.style,
+				matrix;
 
-			if (supportTransform) {
-				return (computed ? getComputedStyle(elem) : elem.style)[supportTransform].split('px').join();
-			
-			} else if (_support.matrixFilter) {
-				var
-						elemStyle = computed && elem.currentStyle ? elem.currentStyle : elem.style
-					, matrix
-					;
-				if ( elemStyle && /Matrix=([^)]*)/.test(elemStyle) ) {
-					matrix = RegExp.$1.split(',');
-					matrix = [
-						matrix[0].split('=')[1],
-						matrix[2].split('=')[1],
-						matrix[1].split('=')[1],
-						matrix[3].split('=')[1]
-					];
-				} else {
-					matrix = [0,0,0,0];
-				}
-				matrix[4] = elemStyle ? elemStyle.left : 0;
-				matrix[5] = elemStyle ? elemStyle.top : 0;
-				return "matrix(" + matrix + ")";
+			if ( elemStyle && /Matrix([^)]*)/.test( elemStyle.filter ) ) {
+				matrix = RegExp.$1.split(',');
+				matrix = [
+					matrix[0].split('=')[1],
+					matrix[2].split('=')[1],
+					matrix[1].split('=')[1],
+					matrix[3].split('=')[1]
+				];
+			} else {
+				matrix = [1,0,0,1];
 			}
+			matrix[4] = elemStyle ? elemStyle.left : 0;
+			matrix[5] = elemStyle ? elemStyle.top : 0;
+			return "matrix(" + matrix + ")";
 		},
-		realProperty: support.transform
+		set: function( elem, value ) {
+			value = matrix(value);
+			elem.style.filter = [
+				"progid:DXImageTransform.Microsoft.Matrix(",
+					"M11="+value[0]+",",
+					"M12="+value[2]+",",
+					"M21="+value[1]+",",
+					"M22="+value[3]+",",
+					"SizingMethod='auto expand'",
+				")"
+			].join('');
+			// From pbakaus's Transformie http://github.com/pbakaus/transformie
+			if ( centerOrigin = $.transform.centerOrigin ) {
+				elem.style[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
+				elem.style[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
+			}
+			// We assume that the elements are absolute positionned inside a relative positionned wrapper
+			elem.style.left = value[4] + 'px';
+			elem.style.top = value[5] + 'px';
+		}
 	}
 }
+// populate jQuery.cssHooks with the appropriate hook if necessary
+if ( propertyHook ) {
+	$.cssHooks[propertyName] = propertyHook;
 
+// we need to have an object with set and get to use in animation logic
+} else {
+	propertyHook = {};
+}
+propertyHook.get = propertyHook.get || $.css;
+
+/*
+ * fn.animate() hooks
+ */
 $.fx.step.transform = function( fx ) {
-	var
-			elem = fx.elem
-		, start = fx.start
-		, end = fx.end
-		, pos = fx.pos
-		, transform = ''
-		, prop
-		;
+	var elem = fx.elem,
+		start = fx.start,
+		end = fx.end,
+		pos = fx.pos,
+		transform = '',
+		prop;
 
 	// fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
 	// so that we can interpolate them
 	if ( !start || typeof start === "string" ) {
 		// $.fx.prototype.cur is still broken in 1.5, see #7912
 		if (!start) {
-			start = $.cssHooks.transform.get(elem, true);
+			start = propertyHook.get( elem, supportProperty );
 		}
+
 		// start is either 'none' or a matrix(...) that has to be parsed
 		fx.start = start = start == 'none'?
 			{
@@ -137,8 +182,12 @@ $.fx.step.transform = function( fx ) {
 			}:
 			unmatrix( toArray(start) );
 
-		// fx.end has to be parsed and decompose as long as we have no animation hook 
-		fx.end = end = unmatrix(matrix(end));
+		// fx.end has to be parsed and decomposed
+		fx.end = end = ~end.indexOf('matrix')?
+			// bullet-proof parser
+			unmatrix(matrix(end)):
+			// faster and more precise parser
+			components(end);
 
 		// get rid of properties that do not change
 		for ( prop in start) {
@@ -179,8 +228,14 @@ $.fx.step.transform = function( fx ) {
 			(start.skew[1] + (end.skew[1] - start.skew[1]) * pos) +'rad'+
 		')';
 	}
-	$.cssHooks.transform.set( elem, transform );
+	propertyHook.set?
+		propertyHook.set( elem, transform ):
+		elem.style[supportProperty] = transform;
 };
+
+/*
+ * Utility functions
+ */
 
 // turns a transform string into its 'matrix(A,B,C,D,X,Y)' form (as an array, though)
 function matrix( transform ) {
@@ -333,6 +388,71 @@ function unmatrix(matrix) {
 	}
 }
 
+// parse tranform components of a transform string not containing 'matrix(...)'
+function components( transform ) {
+	// split the != transforms
+  transform = transform.split(')');
+
+	var translate = [0,0],
+    rotate = 0,
+    scale = [1,1],
+    skew = [0,0],
+    i = transform.length -1,
+    trim = $.trim,
+    split, name, value;
+
+  // add components
+  while ( i-- ) {
+    split = transform[i].split('(');
+    name = trim(split[0]);
+    value = split[1];
+    
+    if (name == 'translateX') {
+      translate[0] += parseInt(value, 10);
+
+    } else if (name == 'translateY') {
+      translate[1] += parseInt(value, 10);
+
+    } else if (name == 'translate') {
+      value = value.split(',');
+      translate[0] += parseInt(value[0], 10);
+      translate[1] += parseInt(value[1] || 0, 10);
+
+    } else if (name == 'rotate') {
+      rotate += toRadian(value);
+
+    } else if (name == 'scaleX') {
+      scale[0] *= value;
+
+    } else if (name == 'scaleY') {
+      scale[1] *= value;
+
+    } else if (name == 'scale') {
+      value = value.split(',');
+      scale[0] *= value[0];
+      scale[1] *= (value.length>1? value[1] : value[0]);
+
+    } else if (name == 'skewX') {
+      skew[0] += toRadian(value);
+
+    } else if (name == 'skewY') {
+      skew[1] += toRadian(value);
+
+    } else if (name == 'skew') {
+      value = value.split(',');
+      skew[0] += toRadian(value[0]);
+      skew[1] += toRadian(value[1] || 0);
+    }
+	}
+
+  return {
+    translate: translate,
+    rotate: rotate,
+    scale: scale,
+    skew: skew
+  };
+}
+
 // converts an angle string in any unit to a radian Float
 function toRadian(value) {
 	return ~value.indexOf('deg') ?
@@ -353,4 +473,4 @@ $.transform = {
 	centerOrigin: 'margin'
 };
 
-})(jQuery);
+})( jQuery );
