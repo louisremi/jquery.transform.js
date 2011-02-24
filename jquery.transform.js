@@ -1,5 +1,5 @@
 /*
- * transform: A jQuery cssHooks adding a cross browser transform property to $.fn.css() and $.fn.animate()
+ * transform: A jQuery cssHooks adding cross-browser 2d transform capabilities to $.fn.css() and $.fn.animate()
  *
  * limitations:
  * - requires jQuery 1.4.3+
@@ -147,7 +147,7 @@ if ( supportProperty ) {
 if ( propertyHook ) {
 	$.cssHooks[propertyName] = propertyHook;
 
-// we need to have an object with set and get to use in animation logic
+// we need a unique setter for the animation logic
 } else {
 	propertyHook = {};
 }
