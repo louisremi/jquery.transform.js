@@ -8,6 +8,7 @@ Set transform with a string
     $('#myDiv').animate({transform: 'translateY(-100px) rotate(1rad) scaleX(2) skewY(42deg)'});
 
 You can use the following list of transform components:
+
 - `translateX(<number>px)`
 - `translateY(<number>px)`
 - combined: `translate(<number>px, <number>px)` *the second number is optional and defaults to 0*
