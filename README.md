@@ -7,6 +7,22 @@ Set transform with a string
     $('#myDiv').css('transform', 'translate(50px, 30px) rotate(25deg) scale(2,.5) skew(-35deg)');
     $('#myDiv').animate({transform: 'translateY(-100px) rotate(1rad) scaleX(2) skewY(42deg)'});
 
+You can use the following list of transform components:
+- `translateX(<number>px)`
+- `translateY(<number>px)`
+- combined: `translate(<number>px, <number>px)` *the second number is optional and defaults to 0*
+- `scaleX(<number>)`
+- `scaleY(<number>)`
+- combined: `scale(<number>, <number>)` *the second number is optional and defaults to the value of the first one*
+- `rotate(<angle>)` *units for angles are *rad* (default), *deg* or *grad*.*
+- `skew(<angle>)`
+- `skew(<angle>)`
+- combined: `skew(<angle>, <angle>)` *the second angle is optional and defaults to 0*
+- `matrix(<number>, <number>, <number>, <number>, <number>, <number>)`
+
+`matrix` gives you more control about the resulting transformation, using a [matrix construction set](http://www.useragentman.com/matrix/).
+But it gives you less control over animations; you cannot control whether elements are going to rotate clockwise or anti-clockwise for instance.
+
 Get transform
 -------------
 
@@ -20,8 +36,6 @@ Limitations:
 - requires jQuery 1.4.3+
 - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE**.
 - transformOrigin is not accessible
-
-and **transforms are additive**, I already told it.
 
 Why such restrictions with 'translate'?
 ---------------------------------------
