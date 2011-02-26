@@ -24,7 +24,7 @@
 var div = document.createElement('div'),
 	divStyle = div.style,
 	propertyName = 'transform',
-	suffix = propertyName[0].toUpperCase() + propertyName.slice(1),
+	suffix = 'Transform',
 	testProperties = [
 		'O' + suffix,
 		'ms' + suffix,
@@ -58,7 +58,7 @@ $.cssNumber[propertyName] = true;
 /*
  * fn.css() hooks
  */
-if ( supportProperty ) {
+if ( supportProperty && supportProperty != propertyName ) {
 	// Modern browsers can use jQuery.cssProps as a basic hook
 	$.cssProps[propertyName] = supportProperty;
 	
@@ -121,25 +121,38 @@ if ( supportProperty ) {
 			matrix[5] = elemStyle ? elemStyle.top : 0;
 			return "matrix(" + matrix + ")";
 		},
-		set: function( elem, value ) {
+		set: function( elem, value, animate ) {
+			/*if ( !animate ) {
+				elem.style.zoom = 1;
+			}*/
+
 			value = matrix(value);
-			elem.style.filter = [
-				"progid:DXImageTransform.Microsoft.Matrix(",
-					"M11="+value[0]+",",
-					"M12="+value[2]+",",
-					"M21="+value[1]+",",
-					"M22="+value[3]+",",
-					"SizingMethod='auto expand'",
-				")"
-			].join('');
-			// From pbakaus's Transformie http://github.com/pbakaus/transformie
-			if ( centerOrigin = $.transform.centerOrigin ) {
+
+			// rotate, scale and skew
+			if ( !animate || animate.M ) {
+				elem.style.filter = [
+					"progid:DXImageTransform.Microsoft.Matrix(",
+						"M11="+value[0]+",",
+						"M12="+value[2]+",",
+						"M21="+value[1]+",",
+						"M22="+value[3]+",",
+						"SizingMethod='auto expand'",
+					")"
+				].join('');
+			}
+
+			// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
+			if ( (centerOrigin = $.transform.centerOrigin) ) {
 				elem.style[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
 				elem.style[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
 			}
-			// We assume that the elements are absolute positionned inside a relative positionned wrapper
-			elem.style.left = value[4] + 'px';
-			elem.style.top = value[5] + 'px';
+
+			// translate
+			if ( !animate || animate.T ) {
+				// We assume that the elements are absolute positionned inside a relative positionned wrapper
+				elem.style.left = value[4] + 'px';
+				elem.style.top = value[5] + 'px';
+			}
 		}
 	}
 }
@@ -162,15 +175,22 @@ $.fx.step.transform = function( fx ) {
 		end = fx.end,
 		pos = fx.pos,
 		transform = '',
+		T = false,
+		M = false,
 		prop;
 
 	// fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
 	// so that we can interpolate them
 	if ( !start || typeof start === "string" ) {
-		// $.fx.prototype.cur is still broken in 1.5, see #7912
+		// the following block can be commented out with jQuery 1.5.1+, see #7912
 		if (!start) {
 			start = propertyHook.get( elem, supportProperty );
 		}
+
+		/*// apply IE678 fixes only once per animation
+		if ( supportMatrixFilter ) {
+			elem.style.zoom = 1;
+		}*/
 
 		// start is either 'none' or a matrix(...) that has to be parsed
 		fx.start = start = start == 'none'?
@@ -212,24 +232,28 @@ $.fx.step.transform = function( fx ) {
 			((start.translate[0] + (end.translate[0] - start.translate[0]) * pos + .5) | 0) +'px,'+
 			((start.translate[1] + (end.translate[1] - start.translate[1]) * pos + .5) | 0) +'px'+
 		')';
+		T = true;
 	}
 	if ( start.rotate != undefined ) {
 		transform += ' rotate('+ (start.rotate + (end.rotate - start.rotate) * pos) +'rad)';
+		M = true;
 	}
 	if ( start.scale ) {
 		transform += ' scale('+
 			(start.scale[0] + (end.scale[0] - start.scale[0]) * pos) +','+
 			(start.scale[1] + (end.scale[1] - start.scale[1]) * pos) +
 		')';
+		M = true;
 	}
 	if ( start.skew ) {
 		transform += ' skew('+
 			(start.skew[0] + (end.skew[0] - start.skew[0]) * pos) +'rad,'+
 			(start.skew[1] + (end.skew[1] - start.skew[1]) * pos) +'rad'+
 		')';
+		M = true;
 	}
 	propertyHook.set?
-		propertyHook.set( elem, transform ):
+		propertyHook.set( elem, transform, {M: M, T: T} ):
 		elem.style[supportProperty] = transform;
 };
 
