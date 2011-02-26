@@ -24,7 +24,7 @@
 var div = document.createElement('div'),
 	divStyle = div.style,
 	propertyName = 'transform',
-	suffix = propertyName[0].toUpperCase() + propertyName.slice(1),
+	suffix = 'Transform', // IE<8 cannot access string as array as follows: propertyName[0].toUpperCase() + propertyName.slice(1),
 	testProperties = [
 		'O' + suffix,
 		'ms' + suffix,
@@ -122,6 +122,7 @@ if ( supportProperty ) {
 			return "matrix(" + matrix + ")";
 		},
 		set: function( elem, value ) {
+			elem.style.zoom = '1'; // Must add hasLayout to work in IE<8
 			value = matrix(value);
 			elem.style.filter = [
 				"progid:DXImageTransform.Microsoft.Matrix(",
