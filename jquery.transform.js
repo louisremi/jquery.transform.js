@@ -128,15 +128,28 @@ if ( supportProperty && supportProperty != propertyName ) {
 
 			// rotate, scale and skew
 			if ( !animate || animate.M ) {
-				elem.style.filter = elem.currentStyle['filter'] + [
-					" progid:DXImageTransform.Microsoft.Matrix(",
-						"M11="+value[0]+",",
-						"M12="+value[2]+",",
-						"M21="+value[1]+",",
-						"M22="+value[3]+",",
-						"SizingMethod='auto expand'",
-					")"
-				].join('');
+				var elemFilter = elem.currentStyle['filter'];
+				
+				if(~elemFilter.indexOf('Matrix')) {
+					var elemMatrix = elem.filters["DXImageTransform.Microsoft.Matrix"];
+					
+					elemMatrix.M11 = value[0];
+					elemMatrix.M12 = value[2];
+					elemMatrix.M21 = value[1];
+					elemMatrix.M22 = value[3];
+					elemMatrix.SizingMethod = "auto expand";
+				} else {
+					elem.style.filter = [
+						elemFilter === "" ? "" : elemFilter + " ",
+						"progid:DXImageTransform.Microsoft.Matrix(",
+							"M11="+value[0]+",",
+							"M12="+value[2]+",",
+							"M21="+value[1]+",",
+							"M22="+value[3]+",",
+							"SizingMethod='auto expand'",
+						")"
+					].join('');
+				}
 
 				// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
 				if ( (centerOrigin = $.transform.centerOrigin) ) {
