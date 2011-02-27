@@ -122,11 +122,13 @@ if ( supportProperty && supportProperty != propertyName ) {
 			return "matrix(" + matrix + ")";
 		},
 		set: function( elem, value, animate ) {
+			elem.style.zoom = '1'; // Give hasLayout to elements that don't have it
+
 			value = matrix(value);
 
 			// rotate, scale and skew
-			if ( !animate || animate.M ) {				
-				elem.style.filter = elem.currentStyle['filter'] + [ // Make Matrix additive
+			if ( !animate || animate.M ) {
+				elem.style.filter = elem.currentStyle['filter'] + [
 					" progid:DXImageTransform.Microsoft.Matrix(",
 						"M11="+value[0]+",",
 						"M12="+value[2]+",",
