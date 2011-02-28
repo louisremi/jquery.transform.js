@@ -129,6 +129,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 		set: function( elem, value, animate ) {
 			var elemStyle = elem.style,
 				Matrix,
+				currentStyle,
 				filter;
 
 			if ( !animate ) {
@@ -139,15 +140,15 @@ if ( supportProperty && supportProperty != propertyName ) {
 
 			// rotate, scale and skew
 			if ( !animate || animate.M ) {
-				var Matrix = [
-						"Matrix("+
-							"M11="+value[0],
-							"M12="+value[2],
-							"M21="+value[1],
-							"M22="+value[3],
-							"SizingMethod='auto expand'"
-					].join(),
-					filter = elemStyle.filter || "";
+				Matrix = [
+					"Matrix("+
+						"M11="+value[0],
+						"M12="+value[2],
+						"M21="+value[1],
+						"M22="+value[3],
+						"SizingMethod='auto expand'"
+				].join();
+				filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
 
 				elemStyle.filter = rMatrix.test(filter) ?
 					filter.replace(rMatrix, Matrix) :
