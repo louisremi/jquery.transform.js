@@ -147,7 +147,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 
 				elemStyle.filter = rMatrix.test(filter) ?
 					filter.replace(rMatrix, Matrix) :
-					elemStyle.filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
+					filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
 
 				// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
 				if ( (centerOrigin = $.transform.centerOrigin) ) {
