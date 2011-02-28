@@ -37,6 +37,7 @@ var div = document.createElement('div'),
 	supportProperty,
 	supportMatrixFilter,
 	propertyHook,
+	propertyGet,
 	rMatrix = /Matrix([^)]*)/;
 
 // test different vendor prefixes of this property
@@ -80,12 +81,15 @@ if ( supportProperty && supportProperty != propertyName ) {
 					value;
 			}
 		}
-	// rupper is not yet fixed in jQuery 1.5.1 for IE9, see http://jqbug.com/8346
-	} else if ( supportProperty == 'ms' + suffix ) {
+	/* Fix two jQuery bugs still present in 1.5.1
+	 * - rupper is incompatible with IE9, see http://jqbug.com/8346
+	 * - jQuery.css is not really jQuery.cssProps aware
+	 */
+	} else {
 		propertyHook = {
 			get: function( elem, computed ) {
 				return (computed ?
-					$.css( elem, 'MsTransform' ):
+					$.css( elem, supportProperty.replace(/^ms/, 'Ms') ):
 					elem.style[supportProperty]
 				)
 			}
@@ -168,12 +172,9 @@ if ( supportProperty && supportProperty != propertyName ) {
 // populate jQuery.cssHooks with the appropriate hook if necessary
 if ( propertyHook ) {
 	$.cssHooks[propertyName] = propertyHook;
-
-// we need a unique setter for the animation logic
-} else {
-	propertyHook = {};
 }
-propertyHook.get = propertyHook.get || $.css;
+// we need a unique setter for the animation logic
+propertyGet = propertyHook && propertyHook.get || $.css;
 
 /*
  * fn.animate() hooks
@@ -193,7 +194,7 @@ $.fx.step.transform = function( fx ) {
 	if ( !start || typeof start === "string" ) {
 		// the following block can be commented out with jQuery 1.5.1+, see #7912
 		if (!start) {
-			start = propertyHook.get( elem, supportProperty );
+			start = propertyGet( elem, supportProperty );
 		}
 
 		// force layout only once per animation
@@ -261,7 +262,7 @@ $.fx.step.transform = function( fx ) {
 		')';
 		M = true;
 	}
-	propertyHook.set?
+	propertyHook && propertyHook.set ?
 		propertyHook.set( elem, transform, {M: M, T: T} ):
 		elem.style[supportProperty] = transform;
 };
