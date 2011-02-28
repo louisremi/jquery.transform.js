@@ -36,7 +36,8 @@ var div = document.createElement('div'),
 	i = testProperties.length,
 	supportProperty,
 	supportMatrixFilter,
-	propertyHook;
+	propertyHook,
+	rMatrix = /Matrix([^)]*)/;
 
 // test different vendor prefixes of this property
 while ( i-- ) {
@@ -103,10 +104,10 @@ if ( supportProperty && supportProperty != propertyName ) {
 } else if ( supportMatrixFilter ) {
 	propertyHook = {
 		get: function( elem, computed ) {
-			var elemStyle = elem.style,
+			var elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
 				matrix;
 
-			if ( elemStyle && /Matrix([^)]*)/.test( elemStyle.filter ) ) {
+			if ( elemStyle && rMatrix.test( elemStyle.filter ) ) {
 				matrix = RegExp.$1.split(',');
 				matrix = [
 					matrix[0].split('=')[1],
@@ -122,29 +123,37 @@ if ( supportProperty && supportProperty != propertyName ) {
 			return "matrix(" + matrix + ")";
 		},
 		set: function( elem, value, animate ) {
-			/*if ( !animate ) {
-				elem.style.zoom = 1;
-			}*/
+			var elemStyle = elem.style,
+				Matrix,
+				filter;
+
+			if ( !animate ) {
+				elemStyle.zoom = 1;
+			}
 
 			value = matrix(value);
 
 			// rotate, scale and skew
 			if ( !animate || animate.M ) {
-				elem.style.filter = [
-					"progid:DXImageTransform.Microsoft.Matrix(",
-						"M11="+value[0]+",",
-						"M12="+value[2]+",",
-						"M21="+value[1]+",",
-						"M22="+value[3]+",",
-						"SizingMethod='auto expand'",
-					")"
-				].join('');
-			}
+				var Matrix = [
+						"Matrix("+
+							"M11="+value[0],
+							"M12="+value[2],
+							"M21="+value[1],
+							"M22="+value[3],
+							"SizingMethod='auto expand'"
+					].join(),
+					filter = elemStyle.filter || "";
 
-			// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
-			if ( (centerOrigin = $.transform.centerOrigin) ) {
-				elem.style[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
-				elem.style[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
+				elemStyle.filter = rMatrix.test(filter) ?
+					filter.replace(rMatrix, Matrix) :
+					elemStyle.filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
+
+				// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
+				if ( (centerOrigin = $.transform.centerOrigin) ) {
+					elemStyle[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
+					elemStyle[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
+				}
 			}
 
 			// translate
@@ -187,10 +196,10 @@ $.fx.step.transform = function( fx ) {
 			start = propertyHook.get( elem, supportProperty );
 		}
 
-		/*// apply IE678 fixes only once per animation
+		// force layout only once per animation
 		if ( supportMatrixFilter ) {
 			elem.style.zoom = 1;
-		}*/
+		}
 
 		// start is either 'none' or a matrix(...) that has to be parsed
 		fx.start = start = start == 'none'?
