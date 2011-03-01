@@ -128,8 +128,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 		},
 		set: function( elem, value, animate ) {
 			var elemStyle = elem.style,
-				Matrix,
 				currentStyle,
+				Matrix,
 				filter;
 
 			if ( !animate ) {
@@ -164,8 +164,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			// translate
 			if ( !animate || animate.T ) {
 				// We assume that the elements are absolute positionned inside a relative positionned wrapper
-				elem.style.left = value[4] + 'px';
-				elem.style.top = value[5] + 'px';
+				elemStyle.left = value[4] + 'px';
+				elemStyle.top = value[5] + 'px';
 			}
 		}
 	}
