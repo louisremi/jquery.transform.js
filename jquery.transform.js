@@ -184,6 +184,7 @@ $.fx.step.transform = function( fx ) {
 	var elem = fx.elem,
 		start = fx.start,
 		end = fx.end,
+		split,
 		pos = fx.pos,
 		transform = '',
 		T = false,
@@ -201,6 +202,15 @@ $.fx.step.transform = function( fx ) {
 		// force layout only once per animation
 		if ( supportMatrixFilter ) {
 			elem.style.zoom = 1;
+		}
+
+		// if the start computed matrix is in end, we are doing a relative animation
+		split = end.split(start);
+		if ( split.length == 2 ) {
+			// remove the start computed matrix to make animations more accurate
+			end = split.join('');
+			fx.origin = start;
+			start = 'none';
 		}
 
 		// start is either 'none' or a matrix(...) that has to be parsed
@@ -263,6 +273,10 @@ $.fx.step.transform = function( fx ) {
 		')';
 		M = true;
 	}
+
+	// In case of relative animation, restore the origin computed matrix here.
+	transform += fx.origin? ' ' + fx.origin : '';
+
 	propertyHook && propertyHook.set ?
 		propertyHook.set( elem, transform, {M: M, T: T} ):
 		elem.style[supportProperty] = transform;
