@@ -198,7 +198,7 @@ $.fx.step.transform = function( fx ) {
 		start.skew[1] + (end.skew[1] - start.skew[1]) * pos
 	];
 
-	propertyHook.set( elem, transform, animate );
+	propertyHook.set( elem, transform, true );
 };
 
 /*
