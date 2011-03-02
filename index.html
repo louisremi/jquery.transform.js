@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>transform: add cross-browser 2d transform capabilities to jQuery css() and animate()</title>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<link href='http://fonts.googleapis.com/css?family=Josefin+Slab:bold' rel='stylesheet' type='text/css'><style>
+		body {
+			background: #333;
+			width: 1000px;
+			margin: 0 auto;
+			color: #FFF;
+			overflow-x: hidden;
+			font-family: Arial, "Liberation Sans", sans;
+		}
+		
+		header h1 {
+			font-family: 'Josefin Slab', arial, serif;
+			font-size: 6em;
+			color: #BBB;
+			text-shadow: 1px 0px #FFF;
+			margin: 30px 0 5px;
+		}
+		
+		section {
+			clear: both;
+		}
+		
+		h2 {
+			font-family: 'Josefin Slab', arial, serif;
+			font-size: 2em;
+			padding: 2em 0 .3em; 
+		}
+		
+		#basic li {
+			display: inline-block;
+			width: 250px;
+		}
+		
+		.square {
+			width: 100px;
+			height: 100px;
+			margin: 0 75px;
+		}
+		
+		.cover {
+			margin: 20px 0;
+			position: absolute;
+		}
+		
+		.fright {
+			float: right;
+		}
+		.fleft {
+			float: left;
+		}
+		
+		.color1 {
+			background: #bf0000;
+			color: #bf0000;
+		}
+		.color2 {
+			background: #bf5600;
+			color: #bf5600;
+		}
+		.color3 {
+			background: #bfac00;
+			color: #bfac00;
+		}
+		.color4 {
+			background: #7cbf00;
+			color: #7cbf00;
+		}
+		.color5 {
+			background: #26bf00;
+			color: #26bf00;
+		}
+		.color6 {
+			background: #00bf2f;
+			color: #00bf2f;
+		}
+		.color7 {
+			background: #00bf85;
+			color: #00bf85;
+		}
+		.color8 {
+			background: #00a2bf;
+			color: #00a2bf;
+		}
+		.color9 {
+			background: #004cbf;
+			color: #004cbf;
+		}
+		.color10 {
+			background: #0900bf;
+			color: #0900bf;
+		}
+		.color11 {
+			background: #5f00bf;
+			color: #5f00bf;
+		}
+		.color12 {
+			background: #b500bf;
+			color: #b500bf;
+		}
+	</style>
+</head>
+
+<body>
+	
+	<header>
+		<h1>jquery.transform.js</h1>
+		<p>cross-browser 2d transform plugin</p>
+	</header>
+	
+	<section id="basic">
+		<h2>Basic usage</h2>
+		<ul>
+			<li><pre class="prettyprint lang-js">$(elem).animate({
+  transform: 'translateX(50px)'
+});</pre>
+			<li><pre class="prettyprint lang-js">$(elem).animate({
+  transform: 'rotate(135deg)'
+});</pre>
+			<li><pre class="prettyprint lang-js">$(elem).animate({
+  transform: 'scale(2,.5)'
+});</pre>
+			<li><pre class="prettyprint lang-js">$(elem).animate({
+  transform: 'skew(35deg,15deg)'
+});</pre>
+		</ul>
+		<div style="position: relative;" class="square fleft">
+			<div id="basic1" class="square color1" style="position: absolute; margin-left: 0;" data-trans="translateX(50px)"></div>
+		</div>
+		<div id="basic2" class="square color2 fleft" data-trans="rotate(135deg)"></div>
+		<div id="basic3" class="square color3 fleft" data-trans="scale(2,.5)"></div>
+		<div id="basic4" class="square color4 fleft" data-trans="skew(35deg,15deg)"></div>
+	</section>
+	
+	<section id="advanced">
+		<h2>Advanced usage</h2>
+		<pre class="prettyprint lang-js">// Combine transform components to create isometric 3d transform.
+var transforms = [
+    'skewY(-45deg) scale(.66)',
+    'translate(20px) skewY(-45deg) scale(.66)',
+    'translate(150px,50px) scale(1.5,1)',
+    'translate(280px) skewY(45deg) scale(.66)',
+    'translate(300px) skewY(45deg) scale(.66)'
+  ],
+  $squares = $('.square').each(function(i) {
+    $(this).css({ transform: transforms[i] });
+  });
+$('#cover').mouseenter(function() {
+  $squares.each(function(i) {
+    $(this).animate({ transform: transforms[i+1] });
+  });
+}).mouseleave(function() {
+  $squares.each(function(i) {
+    $(this).animate({ transform: transforms[i] });
+  });
+});
+</pre>
+		<div id="basic5678" style="height: 150px; width: 400px; position: relative;">
+			<div id="basic5" class="square cover color5"></div>
+			<div id="basic6" class="square cover color6"></div>
+			<div id="basic7" class="square cover color7" style="z-index: 2"></div>
+			<div id="basic8" class="square cover color8"></div>
+		</div>
+	</section>
+	
+	<section id="relative">
+		<h2></h2>
+		<!--<h2>Relative animations</h2>
+		<pre class="prettyprint lang-js">$(this).animate({
+  transform: 'rotate(90deg) translate(100px)'
+}, function() {
+  $(this).delay(500).animate({
+    transform: $(this).css('transform') + ' rotate(90deg) translate(100px)'
+  });
+});</pre>
+		<div id="basic9" class="square color9"></div>-->
+	</section>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
+	<script src="jquery.transform.light.js"></script>
+	<script type="text/javascript" src="js/prettify.js"></script>
+	<script>
+		$(function() {
+			prettyPrint();
+			
+			$('#basic').delegate('.square', 'mouseenter', function() {
+				if ( !$(this).queue("fx").length ) {
+					$(this).animate({
+						transform: $(this).data('trans')
+					}).rewind();
+				}
+			});
+			
+			var transforms = [
+					'skewY(-45deg) scale(.66)',
+					'translate(20px) skewY(-45deg) scale(.66)',
+					'translate(150px,50px) scale(1.5,1)',
+					'translate(280px) skewY(45deg) scale(.66)',
+					'translate(300px) skewY(45deg) scale(.66)'
+				],
+				$squares = $('#basic5678 .square').each(function(i) {
+					$(this).css({ transform: transforms[i] });
+				});
+			$('#basic5678').mouseenter(function() {
+				$squares.each(function(i) {
+					$(this).animate({ transform: transforms[i+1] });
+				});
+			}).mouseleave(function() {
+				$squares.each(function(i) {
+					$(this).animate({ transform: transforms[i] });
+				});
+			});
+			
+			/*$('#basic9').mouseenter(function() {
+				if ( !$(this).queue("fx").length ) {
+					$(this).animate({
+						transform: 'rotate(90deg) translate(100px)'
+					}, function() {
+						$(this).delay(500).animate({
+							transform: $(this).css('transform') + ' rotate(90deg) translate(100px)'
+						}).rewind();
+					});
+				}
+			});*/
+			
+			$.fn.rewind = function() {
+				return this.each(function() {
+					$(this).delay(
+						2000
+					).queue(function() {
+						$(this).css('opacity', .5).dequeue();
+					}).animate({
+						transform: ''
+					}).queue(function() {
+						$(this).css('opacity', 1).dequeue();
+					});
+				})
+			};
+		});
+	</script>
+</body>
+</html>

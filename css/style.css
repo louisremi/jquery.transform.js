@@ -1,0 +1,106 @@
+/*------------------------------------*\
+  RESET
+\*------------------------------------*/
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0b1 | 201101
+   NOTE:WORK IN PROGRESS
+   USE WITH CAUTION AND TEST WITH ABANDON */
+
+html,body,div,span,applet,object,iframe,
+h1,h2,h3,h4,h5,h6,p,blockquote,pre,
+a,abbr,acronym,address,big,cite,code,
+del,dfn,em,img,ins,kbd,q,s,samp,
+small,strike,strong,sub,sup,tt,var,
+b,u,i,center,
+dl,dt,dd,ol,ul,li,
+fieldset,form,label,legend,
+table,caption,tbody,tfoot,thead,tr,th,td,
+article,aside,canvas,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section,summary,
+time,mark,audio,video{
+  margin:0;
+  padding:0;
+  border:0;
+  outline:0;
+  font-size:100%;
+  font:inherit;
+  vertical-align:baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,aside,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section{
+  display:block;
+}
+body{
+  line-height:1;
+}
+ol,ul{
+  list-style:none;
+}
+blockquote,q{
+  quotes:none;
+}
+blockquote:before,blockquote:after,
+q:before,q:after{
+  content:'';
+  content:none;
+}
+/* remember to define visible focus styles!
+:focus{
+  outline:?????;
+} */
+
+/* remember to highlight inserts somehow! */
+ins{
+  text-decoration:none;
+}
+del{
+  text-decoration:line-through;
+}
+
+table{
+  border-collapse:collapse;
+  border-spacing:0;
+}
+
+/*------------------------------------*\
+  PRETTIFY
+\*------------------------------------*/
+/* Pretty printing styles. Used with prettify.js. */
+
+/* SPAN elements with the classes below are added by prettyprint. */
+.prettyprint {
+	font-family: monospace;
+	font-size: 11px;
+}
+.str { color: #BFAC00; }
+.kwd, .typ { color: #BF5600; }
+.com { color: #111; }
+.lit { color: #26BF00; }
+.pun, .opn, .clo { color: #999; }
+.pln { color: #DDD; }
+.tag { color: #008; }
+.atn { color: #606; }
+.atv { color: #080; }
+.dec { color: #606; }
+
+/* Specify class=linenums on a pre to get line numbering */
+ol.linenums { margin-top: 0; margin-bottom: 0 } /* IE indents via margin-left */
+li.L0,
+li.L1,
+li.L2,
+li.L3,
+li.L5,
+li.L6,
+li.L7,
+li.L8 { list-style-type: none }
+/* Alternate shading for lines */
+li.L1,
+li.L3,
+li.L5,
+li.L7,
+li.L9 { background: #eee }
+
+/*------------------------------------*\
+  MAIN
+\*------------------------------------*/
