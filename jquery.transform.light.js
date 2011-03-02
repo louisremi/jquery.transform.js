@@ -1,9 +1,10 @@
 /*
- * transform: A jQuery cssHooks adding cross-browser 2d transform capabilities to $.fn.css() and $.fn.animate()
+ * transform: A light jQuery cssHooks for 2d transform
  *
  * limitations:
  * - requires jQuery 1.4.3+
  * - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE678**.
+ * - incompatible with 'matrix(...)' transforms
  * - transformOrigin is not accessible
  *
  * latest version and complete README available on Github:
@@ -62,12 +63,16 @@ $.cssNumber[propertyName] = true;
 $.cssHooks[propertyName] = propertyHook = {
 	// One fake getter to rule them all 
 	get: function( elem ) {
-		return $.data( elem, 'transform' ) || {
+		var transform = $.data( elem, 'transform' ) || {
       translate: [0,0],
       rotate: 0,
       scale: [1,1],
       skew: [0,0]
     };
+    transform.toString = function() {
+    	return 'translate('+this.translate[0]+'px,'+this.translate[1]+'px) rotate('+this.rotate+'rad) scale('+this.scale+') skew('+this.skew[0]+'rad,'+this.skew[1]+'rad)';
+    }
+    return transform;
 	},
 	set: function( elem, value, animate ) {
 		if ( typeof value === 'string' ) {
@@ -169,24 +174,8 @@ $.fx.step.transform = function( fx ) {
 			elem.style.zoom = 1;
 		}
 
-		// relative animation
-		if ( /^([+-])=/.test(end) ) {
-			end = end.slice(2);
-			coef = RegExp.$1 == '+'? 1 : -1;
-		}
-
-		// end has to be parsed and decomposed
-		end = components(end);
-		if ( coef ) {
-			end.translate[0] += start.translate[0] * coef;
-			end.translate[1] += start.translate[1] * coef;
-			end.rotate += start.rotate * coef;
-			end.scale[0] += start.scale[0] * coef +1;
-			end.scale[1] += start.scale[1] * coef +1;
-			end.skew[0] += start.skew[0] * coef;
-			end.skew[1] += start.skew[1] * coef;
-		}
-		fx.end = end;
+		// end has to be parsed
+		fx.end = end = components(end);
 	}
 
 	/*
@@ -268,7 +257,7 @@ function components( transform ) {
     } else if (name == 'skew') {
       value = value.split(',');
       skew[0] += toRadian(value[0]);
-      skew[1] += toRadian(value[1] || 0);
+      skew[1] += toRadian(value[1] || '0');
     }
 	}
 
