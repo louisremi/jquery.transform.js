@@ -186,10 +186,15 @@ $.fx.step.transform = function( fx ) {
 		end = fx.end,
 		split,
 		pos = fx.pos,
-		transform = '',
+		transform,
+		translate,
+		rotate,
+		scale,
+		skew,
 		T = false,
 		M = false,
 		prop;
+	translate = rotate = scale = skew = '';
 
 	// fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
 	// so that we can interpolate them
@@ -249,25 +254,25 @@ $.fx.step.transform = function( fx ) {
 	 */
 	if ( start.translate ) {
 		// round translate to the closest pixel
-		transform += 'translate('+
+		transform = ' translate('+
 			((start.translate[0] + (end.translate[0] - start.translate[0]) * pos + .5) | 0) +'px,'+
 			((start.translate[1] + (end.translate[1] - start.translate[1]) * pos + .5) | 0) +'px'+
 		')';
 		T = true;
 	}
 	if ( start.rotate != undefined ) {
-		transform += ' rotate('+ (start.rotate + (end.rotate - start.rotate) * pos) +'rad)';
+		rotate = ' rotate('+ (start.rotate + (end.rotate - start.rotate) * pos) +'rad)';
 		M = true;
 	}
 	if ( start.scale ) {
-		transform += ' scale('+
+		scale = ' scale('+
 			(start.scale[0] + (end.scale[0] - start.scale[0]) * pos) +','+
 			(start.scale[1] + (end.scale[1] - start.scale[1]) * pos) +
 		')';
 		M = true;
 	}
 	if ( start.skew ) {
-		transform += ' skew('+
+		skew = ' skew('+
 			(start.skew[0] + (end.skew[0] - start.skew[0]) * pos) +'rad,'+
 			(start.skew[1] + (end.skew[1] - start.skew[1]) * pos) +'rad'+
 		')';
@@ -275,7 +280,9 @@ $.fx.step.transform = function( fx ) {
 	}
 
 	// In case of relative animation, restore the origin computed matrix here.
-	transform += fx.origin? ' ' + fx.origin : '';
+	transform = fx.origin ?
+		fx.origin + translate + skew + scale + rotate:
+		translate + rotate + scale + skew;
 
 	propertyHook && propertyHook.set ?
 		propertyHook.set( elem, transform, {M: M, T: T} ):
@@ -490,7 +497,7 @@ function components( transform ) {
     } else if (name == 'skew') {
       value = value.split(',');
       skew[0] += toRadian(value[0]);
-      skew[1] += toRadian(value[1] || 0);
+      skew[1] += toRadian(value[1] || '0');
     }
 	}
 
