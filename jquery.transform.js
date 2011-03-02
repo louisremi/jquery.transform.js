@@ -254,7 +254,7 @@ $.fx.step.transform = function( fx ) {
 	 */
 	if ( start.translate ) {
 		// round translate to the closest pixel
-		transform = ' translate('+
+		translate = ' translate('+
 			((start.translate[0] + (end.translate[0] - start.translate[0]) * pos + .5) | 0) +'px,'+
 			((start.translate[1] + (end.translate[1] - start.translate[1]) * pos + .5) | 0) +'px'+
 		')';
