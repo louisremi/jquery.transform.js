@@ -83,7 +83,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 		}
 	/* Fix two jQuery bugs still present in 1.5.1
 	 * - rupper is incompatible with IE9, see http://jqbug.com/8346
-	 * - jQuery.css is not really jQuery.cssProps aware
+	 * - jQuery.css is not really jQuery.cssProps aware, see http://jqbug.com/8402
 	 */
 	} else {
 		propertyHook = {
