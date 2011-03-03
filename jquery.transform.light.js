@@ -144,8 +144,8 @@ $.cssHooks[propertyName] = propertyHook = {
 			}
 
 			// We assume that the elements are absolute positionned inside a relative positionned wrapper
-			elemStyle.left = value[4] + 'px';
-			elemStyle.top = value[5] + 'px';
+			elemStyle.left = translate[0] + 'px';
+			elemStyle.top = translate[1] + 'px';
 		}
 	}
 };
