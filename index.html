@@ -4,109 +4,13 @@
 	<meta charset="utf-8" />
 	<title>transform: add cross-browser 2d transform capabilities to jQuery css() and animate()</title>
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
-	<link href='http://fonts.googleapis.com/css?family=Josefin+Slab:bold' rel='stylesheet' type='text/css'><style>
-		body {
-			background: #333;
-			width: 1000px;
-			margin: 0 auto;
-			color: #FFF;
-			overflow-x: hidden;
-			font-family: Arial, "Liberation Sans", sans;
-		}
-		
-		header h1 {
-			font-family: 'Josefin Slab', arial, serif;
-			font-size: 6em;
-			color: #BBB;
-			text-shadow: 1px 0px #FFF;
-			margin: 30px 0 5px;
-		}
-		
-		section {
-			clear: both;
-		}
-		
-		h2 {
-			font-family: 'Josefin Slab', arial, serif;
-			font-size: 2em;
-			padding: 2em 0 .3em; 
-		}
-		
-		#basic li {
-			display: inline-block;
-			width: 250px;
-		}
-		
-		.square {
-			width: 100px;
-			height: 100px;
-			margin: 0 75px;
-		}
-		
-		.cover {
-			margin: 20px 0;
-			position: absolute;
-		}
-		
-		.fright {
-			float: right;
-		}
-		.fleft {
-			float: left;
-		}
-		
-		.color1 {
-			background: #bf0000;
-			color: #bf0000;
-		}
-		.color2 {
-			background: #bf5600;
-			color: #bf5600;
-		}
-		.color3 {
-			background: #bfac00;
-			color: #bfac00;
-		}
-		.color4 {
-			background: #7cbf00;
-			color: #7cbf00;
-		}
-		.color5 {
-			background: #26bf00;
-			color: #26bf00;
-		}
-		.color6 {
-			background: #00bf2f;
-			color: #00bf2f;
-		}
-		.color7 {
-			background: #00bf85;
-			color: #00bf85;
-		}
-		.color8 {
-			background: #00a2bf;
-			color: #00a2bf;
-		}
-		.color9 {
-			background: #004cbf;
-			color: #004cbf;
-		}
-		.color10 {
-			background: #0900bf;
-			color: #0900bf;
-		}
-		.color11 {
-			background: #5f00bf;
-			color: #5f00bf;
-		}
-		.color12 {
-			background: #b500bf;
-			color: #b500bf;
-		}
-	</style>
+	<link href='http://fonts.googleapis.com/css?family=Josefin+Slab:bold' rel='stylesheet' type='text/css'>
 </head>
 
 <body>
+	<a href="http://github.com/lrbabe/jquery.transform.js">
+		<img alt="Fork me on GitHub" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" style="position: absolute; top: 0; right: 0; border: 0;">
+	</a>
 	
 	<header>
 		<h1>jquery.transform.js</h1>
@@ -168,9 +72,8 @@ $('#cover').mouseenter(function() {
 		</div>
 	</section>
 	
-	<section id="relative">
-		<h2></h2>
-		<!--<h2>Relative animations</h2>
+	<!--<section id="relative">
+		<h2>Relative animations</h2>
 		<pre class="prettyprint lang-js">$(this).animate({
   transform: 'rotate(90deg) translate(100px)'
 }, function() {
@@ -178,8 +81,12 @@ $('#cover').mouseenter(function() {
     transform: $(this).css('transform') + ' rotate(90deg) translate(100px)'
   });
 });</pre>
-		<div id="basic9" class="square color9"></div>-->
-	</section>
+		<div id="basic9" class="square color9"></div>
+	</section>-->
+	
+	<footer>
+		by @<a href="http://twitter.com/louis_remi">Louis_Remi</a>
+	</footer>
 
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
 	<script src="jquery.transform.light.js"></script>

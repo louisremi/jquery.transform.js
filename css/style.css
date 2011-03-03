@@ -104,3 +104,113 @@ li.L9 { background: #eee }
 /*------------------------------------*\
   MAIN
 \*------------------------------------*/
+
+body {
+	background: #333;
+	width: 1000px;
+	margin: 0 auto;
+	color: #FFF;
+	overflow-x: hidden;
+	font-family: Arial, "Liberation Sans", sans;
+}
+
+header h1 {
+	font-family: 'Josefin Slab', arial, serif;
+	font-size: 6em;
+	color: #BBB;
+	text-shadow: 1px 0px #FFF;
+	margin: 30px 0 5px;
+}
+
+section, footer {
+	clear: both;
+}
+
+h2 {
+	font-family: 'Josefin Slab', arial, serif;
+	font-size: 2em;
+	padding: 2em 0 .3em; 
+}
+
+footer a {
+	color: #FFF;
+	text-decoration: underline;
+}
+
+footer {
+	font-size: .8em;
+	text-align: right;
+	margin: 4em 0 2em;
+}
+
+#basic li {
+	display: inline-block;
+	width: 250px;
+}
+
+.square {
+	width: 100px;
+	height: 100px;
+	margin: 0 75px;
+}
+
+.cover {
+	margin: 20px 0;
+	position: absolute;
+}
+
+.fright {
+	float: right;
+}
+.fleft {
+	float: left;
+}
+
+.color1 {
+	background: #bf0000;
+	color: #bf0000;
+}
+.color2 {
+	background: #bf5600;
+	color: #bf5600;
+}
+.color3 {
+	background: #bfac00;
+	color: #bfac00;
+}
+.color4 {
+	background: #7cbf00;
+	color: #7cbf00;
+}
+.color5 {
+	background: #26bf00;
+	color: #26bf00;
+}
+.color6 {
+	background: #00bf2f;
+	color: #00bf2f;
+}
+.color7 {
+	background: #00bf85;
+	color: #00bf85;
+}
+.color8 {
+	background: #00a2bf;
+	color: #00a2bf;
+}
+.color9 {
+	background: #004cbf;
+	color: #004cbf;
+}
+.color10 {
+	background: #0900bf;
+	color: #0900bf;
+}
+.color11 {
+	background: #5f00bf;
+	color: #5f00bf;
+}
+.color12 {
+	background: #b500bf;
+	color: #b500bf;
+}
