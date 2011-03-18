@@ -1,4 +1,4 @@
-jquery.transform.js and jquery.transform.light.js are two plugins that add 2d transform capabilities to jQuery `css()` and `animate()` functions.
+jquery.transform.js and jquery.transform.lite.js are two plugins that add 2d transform capabilities to jQuery `css()` and `animate()` functions.
 
 Usage:
 ======
@@ -25,12 +25,12 @@ You can use the following list of transform components:
 
 *`matrix` gives you more control about the resulting transformation, using a [matrix construction set](http://www.useragentman.com/matrix/).  
 When using it in animations however, it makes it impossible to predict how the current and target transformations are going to be interpolated; there is no way to tell whether elements are going to rotate clockwise or anti-clockwise for instance.  
-`matrix` cannot be used with jquery.transform.light.js
+`matrix` cannot be used with jquery.transform.lite.js
 
 Get transform
 -------------
 
-**jquery.transform.light.js** returns an object containing the different transform components of an element. It is only aware of transformations set through jQuery.
+**jquery.transform.lite.js** returns an object containing the different transform components of an element. It is only aware of transformations set through jQuery.
 
     $('#myDiv').css('transform') == {
     	// array of X and Y in pixels
@@ -65,18 +65,18 @@ Both plugins have the following limitations:
 - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE**,
 - transformOrigin is not accessible.
 
-The **light** has the following additional limitations:
+The **lite** has the following additional limitations:
 
 - `matrix(...)` cannot be used,
 - transformations set through other plugins, raw DOM manipulation or stylesheets are ignored: animating or accessing current style would fail,
 - incompatible with [jquery.transition.js](https://github.com/lrbabe/jquery.transition.js).
 
-Light or not light?
+Lite or not lite?
 -------------------
 
-Although the *light* version has more limitations than the *full* version, it has a smaller file-size and is less CPU intensive.  
-Transformation interpolation (i.e. animations) will also be more accurate in the *light* version, since matrices are excluded.  
-It is recommanded to start with the *light* version and then switch to *full* one when the need really arises.
+Although the *lite* version has more limitations than the *full* version, it has a smaller file-size and is less CPU intensive.  
+Transformation interpolation (i.e. animations) will also be more accurate in the *lite* version, since matrices are excluded.  
+It is recommanded to start with the *lite* version and then switch to *full* one when the need really arises.
 
 Why such restrictions with 'translate'?
 ---------------------------------------
