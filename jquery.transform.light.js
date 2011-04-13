@@ -1,5 +1,5 @@
 /*
- * transform: A lite jQuery cssHooks for 2d transform
+ * transform: A light jQuery cssHooks for 2d transform
  *
  * limitations:
  * - requires jQuery 1.4.3+
@@ -131,7 +131,7 @@ $.cssHooks[propertyName] = propertyHook = {
 					"M22="+M22,
 					"SizingMethod='auto expand'"
 			].join();
-			filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
+			filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
 
 			elemStyle.filter = rMatrix.test(filter) ?
 				filter.replace(rMatrix, Matrix) :
