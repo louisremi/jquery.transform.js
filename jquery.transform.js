@@ -148,7 +148,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 						"M22="+value[3],
 						"SizingMethod='auto expand'"
 				].join();
-				filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
+				filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
 
 				elemStyle.filter = rMatrix.test(filter) ?
 					filter.replace(rMatrix, Matrix) :
