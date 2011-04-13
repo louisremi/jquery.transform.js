@@ -71,7 +71,7 @@ The **light** has the following additional limitations:
 - transformations set through other plugins, raw DOM manipulation or stylesheets are ignored: animating or accessing current style would fail,
 - incompatible with [jquery.transition.js](https://github.com/lrbabe/jquery.transition.js).
 
-light or not light?
+Light or not light?
 -------------------
 
 Although the *light* version has more limitations than the *full* version, it has a smaller file-size and is less CPU intensive.  

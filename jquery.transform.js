@@ -7,7 +7,7 @@
  * - transformOrigin is not accessible
  *
  * latest version and complete README available on Github:
- * https://github.com/lrbabe/jquery.transform.js
+ * https://github.com/louisremi/jquery.transform.js
  *
  * Copyright 2011 @louis_remi
  * Licensed under the MIT license.
