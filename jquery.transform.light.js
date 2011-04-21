@@ -4,7 +4,7 @@
  * limitations:
  * - requires jQuery 1.4.3+
  * - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE678**.
- * - incompatible with 'matrix(...)' transforms
+ * - incompatible with "matrix(...)" transforms
  * - transformOrigin is not accessible
  *
  * latest version and complete README available on Github:
@@ -22,15 +22,15 @@
 /*
  * Feature tests and global variables
  */
-var div = document.createElement('div'),
+var div = document.createElement("div"),
 	divStyle = div.style,
-	propertyName = 'transform',
-	suffix = 'Transform',
+	propertyName = "transform",
+	suffix = "Transform",
 	testProperties = [
-		'O' + suffix,
-		'ms' + suffix,
-		'Webkit' + suffix,
-		'Moz' + suffix,
+		"O" + suffix,
+		"ms" + suffix,
+		"Webkit" + suffix,
+		"Moz" + suffix,
 		// prefix-less property
 		propertyName
 	],
@@ -49,7 +49,7 @@ while ( i-- ) {
 }
 // IE678 alternative
 if ( !supportProperty ) {
-	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === '';
+	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === "";
 }
 // prevent IE memory leak
 div = divStyle = null;
@@ -63,19 +63,19 @@ $.cssNumber[propertyName] = true;
 $.cssHooks[propertyName] = propertyHook = {
 	// One fake getter to rule them all 
 	get: function( elem ) {
-		var transform = $.data( elem, 'transform' ) || {
+		var transform = $.data( elem, "transform" ) || {
       translate: [0,0],
       rotate: 0,
       scale: [1,1],
       skew: [0,0]
     };
     transform.toString = function() {
-    	return 'translate('+this.translate[0]+'px,'+this.translate[1]+'px) rotate('+this.rotate+'rad) scale('+this.scale+') skew('+this.skew[0]+'rad,'+this.skew[1]+'rad)';
+    	return "translate("+this.translate[0]+"px,"+this.translate[1]+"px) rotate("+this.rotate+"rad) scale("+this.scale+") skew("+this.skew[0]+"rad,"+this.skew[1]+"rad)";
     }
     return transform;
 	},
 	set: function( elem, value, animate ) {
-		if ( typeof value === 'string' ) {
+		if ( typeof value === "string" ) {
 			value = components(value);
 		}
 		
@@ -87,7 +87,7 @@ $.cssHooks[propertyName] = propertyHook = {
 			currentStyle,
 			filter;
 
-		$.data( elem, 'transform', value );
+		$.data( elem, "transform", value );
 
 		// We can improve performance by avoiding unnecessary transforms
 		// skew is the less likely to be used
@@ -96,7 +96,7 @@ $.cssHooks[propertyName] = propertyHook = {
 		}
 
     if ( supportProperty ) {
-			elemStyle[supportProperty] = 'translate('+translate[0]+'px,'+translate[1]+'px) rotate('+rotate+'rad) scale('+scale+')'+(skew?' skew('+skew[0]+'rad,'+skew[1]+'rad)' : '');
+			elemStyle[supportProperty] = "translate("+translate[0]+"px,"+translate[1]+"px) rotate("+rotate+"rad) scale("+scale+")"+(skew?" skew("+skew[0]+"rad,"+skew[1]+"rad)" : "");
 
 		} else if ( supportMatrixFilter ) {
 
@@ -139,13 +139,13 @@ $.cssHooks[propertyName] = propertyHook = {
 
 			// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
 			if ( (centerOrigin = $.transform.centerOrigin) ) {
-				elemStyle[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
-				elemStyle[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
+				elemStyle[centerOrigin == "margin" ? "marginLeft" : "left"] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + "px";
+				elemStyle[centerOrigin == "margin" ? "marginTop" : "top"] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + "px";
 			}
 
 			// We assume that the elements are absolute positionned inside a relative positionned wrapper
-			elemStyle.left = translate[0] + 'px';
-			elemStyle.top = translate[1] + 'px';
+			elemStyle.left = translate[0] + "px";
+			elemStyle.top = translate[1] + "px";
 		}
 	}
 };
@@ -204,82 +204,90 @@ $.fx.step.transform = function( fx ) {
 /*
  * Utility functions
  */
-// parse tranform components of a transform string not containing 'matrix(...)'
+// parse transform components of a transform string not containing "matrix(...)"
 function components( transform ) {
 	// split the != transforms
-  transform = transform.split(')');
+	transform = transform.split(")");
 
 	var translate = [0,0],
-    rotate = 0,
-    scale = [1,1],
-    skew = [0,0],
-    i = transform.length -1,
-    trim = $.trim,
-    split, name, value;
+		rotate = 0,
+		scale = [1,1],
+		skew = [0,0],
+		i = transform.length -1,
+		trim = $.trim,
+		split, value;
 
-  // add components
-  while ( i-- ) {
-    split = transform[i].split('(');
-    name = trim(split[0]);
-    value = split[1];
-    
-    if (name == 'translateX') {
-      translate[0] += parseInt(value, 10);
+	// add components
+	while ( i-- ) {
+		split = transform[i].split("(");
+		value = split[1];
 
-    } else if (name == 'translateY') {
-      translate[1] += parseInt(value, 10);
+		switch ( trim(split[0]) ) {
+			case "translateX":
+				translate[0] += parseInt(value, 10);
+				break;
 
-    } else if (name == 'translate') {
-      value = value.split(',');
-      translate[0] += parseInt(value[0], 10);
-      translate[1] += parseInt(value[1] || 0, 10);
+			case "translateY":
+				translate[1] += parseInt(value, 10);
+				break;
 
-    } else if (name == 'rotate') {
-      rotate += toRadian(value);
+			case "translate":
+				value = value.split(",");
+				translate[0] += parseInt(value[0], 10);
+				translate[1] += parseInt(value[1] || 0, 10);
+				break;
 
-    } else if (name == 'scaleX') {
-      scale[0] *= value;
+			case "rotate":
+				rotate += toRadian(value);
+				break;
 
-    } else if (name == 'scaleY') {
-      scale[1] *= value;
+			case "scaleX":
+				scale[0] *= value;
 
-    } else if (name == 'scale') {
-      value = value.split(',');
-      scale[0] *= value[0];
-      scale[1] *= (value.length>1? value[1] : value[0]);
+			case "scaleY":
+				scale[1] *= value;
 
-    } else if (name == 'skewX') {
-      skew[0] += toRadian(value);
+			case "scale":
+				value = value.split(",");
+				scale[0] *= value[0];
+				scale[1] *= (value.length>1? value[1] : value[0]);
+				break;
 
-    } else if (name == 'skewY') {
-      skew[1] += toRadian(value);
+			case "skewX":
+				skew[0] += toRadian(value);
+				break;
 
-    } else if (name == 'skew') {
-      value = value.split(',');
-      skew[0] += toRadian(value[0]);
-      skew[1] += toRadian(value[1] || '0');
-    }
+			case "skewY":
+				skew[1] += toRadian(value);
+				break;
+
+			case "skew":
+				value = value.split(",");
+				skew[0] += toRadian(value[0]);
+				skew[1] += toRadian(value[1] || "0");
+				break;
+		}
 	}
 
-  return {
-    translate: translate,
-    rotate: rotate,
-    scale: scale,
-    skew: skew
-  };
+	return {
+		translate: translate,
+		rotate: rotate,
+		scale: scale,
+		skew: skew
+	};
 }
 
 // converts an angle string in any unit to a radian Float
 function toRadian(value) {
-	return ~value.indexOf('deg') ?
+	return ~value.indexOf("deg") ?
 		parseInt(value,10) * (Math.PI * 2 / 360):
-		~value.indexOf('grad') ?
+		~value.indexOf("grad") ?
 			parseInt(value,10) * (Math.PI/200):
 			parseFloat(value);
 }
 
 $.transform = {
-	centerOrigin: 'margin',
+	centerOrigin: "margin",
 	radToDeg: function( rad ) {
 		return rad * 180 / Math.PI;
 	}
