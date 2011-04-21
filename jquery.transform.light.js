@@ -64,21 +64,21 @@ $.cssHooks[propertyName] = propertyHook = {
 	// One fake getter to rule them all 
 	get: function( elem ) {
 		var transform = $.data( elem, "transform" ) || {
-      translate: [0,0],
-      rotate: 0,
-      scale: [1,1],
-      skew: [0,0]
-    };
-    transform.toString = function() {
-    	return "translate("+this.translate[0]+"px,"+this.translate[1]+"px) rotate("+this.rotate+"rad) scale("+this.scale+") skew("+this.skew[0]+"rad,"+this.skew[1]+"rad)";
-    }
-    return transform;
+			translate: [0,0],
+			rotate: 0,
+			scale: [1,1],
+			skew: [0,0]
+		};
+		transform.toString = function() {
+			return "translate("+this.translate[0]+"px,"+this.translate[1]+"px) rotate("+this.rotate+"rad) scale("+this.scale+") skew("+this.skew[0]+"rad,"+this.skew[1]+"rad)";
+		}
+		return transform;
 	},
 	set: function( elem, value, animate ) {
 		if ( typeof value === "string" ) {
 			value = components(value);
 		}
-		
+
 		var translate = value.translate,
 			rotate = value.rotate,
 			scale = value.scale,
@@ -95,7 +95,7 @@ $.cssHooks[propertyName] = propertyHook = {
 			skew = 0;
 		}
 
-    if ( supportProperty ) {
+		if ( supportProperty ) {
 			elemStyle[supportProperty] = "translate("+translate[0]+"px,"+translate[1]+"px) rotate("+rotate+"rad) scale("+scale+")"+(skew?" skew("+skew[0]+"rad,"+skew[1]+"rad)" : "");
 
 		} else if ( supportMatrixFilter ) {
@@ -113,7 +113,7 @@ $.cssHooks[propertyName] = propertyHook = {
 				tanX,
 				tanY,
 				Matrix;
-				  
+
 			if ( skew ) {
 				tanX = Math.tan(skew[0]);
 				tanY = Math.tan(skew[1]);
