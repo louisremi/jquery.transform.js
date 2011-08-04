@@ -75,8 +75,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 				)
 			},
 			set: function( elem, value ) {
-				// remove "px" from matrices
-				elem.style[supportProperty] = /matrix[^)p]*\)/.test(value) ?
+				// add "px" to matrices
+				elem.style[supportProperty] = /matrix\([^)p]*\)/.test(value) ?
 					value.replace(/matrix((?:[^,]*,){4})([^,]*),([^)]*)/, "matrix$1$2px,$3px"):
 					value;
 			}
