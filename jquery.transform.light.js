@@ -1,5 +1,5 @@
 /*
- * transform: A light jQuery cssHooks for 2d transform
+ * transform.light: A light jQuery cssHooks for 2d transform
  *
  * limitations:
  * - requires jQuery 1.4.3+
