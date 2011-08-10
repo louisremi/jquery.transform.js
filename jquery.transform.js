@@ -130,7 +130,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			var elemStyle = elem.style,
 				currentStyle,
 				Matrix,
-				filter;
+				filter,
+				centerOrigin;
 
 			if ( !animate ) {
 				elemStyle.zoom = 1;
@@ -175,7 +176,7 @@ if ( propertyHook ) {
 	$.cssHooks[propertyName] = propertyHook;
 }
 // we need a unique setter for the animation logic
-propertyGet = propertyHook && propertyHook.get || $.css;
+propertyGet = propertyHook && propertyHook.get || $.css;
 
 /*
  * fn.animate() hooks
@@ -433,7 +434,7 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
-		rotate = scaleX = scaleY = skew = 0;
+		B = A = scaleX = scaleY = skew = 0;
 	}
 
 	return {
