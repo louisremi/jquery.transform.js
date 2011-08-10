@@ -112,7 +112,8 @@ $.cssHooks[propertyName] = propertyHook = {
 				M22 = cos*scale[1],
 				tanX,
 				tanY,
-				Matrix;
+				Matrix,
+				centerOrigin;
 
 			if ( skew ) {
 				tanX = Math.tan(skew[0]);
