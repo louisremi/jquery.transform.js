@@ -176,7 +176,7 @@ if ( propertyHook ) {
 	$.cssHooks[propertyName] = propertyHook;
 }
 // we need a unique setter for the animation logic
-propertyGet = propertyHook && propertyHook.get || $.css;
+propertyGet = propertyHook && propertyHook.get || $.css;
 
 /*
  * fn.animate() hooks
