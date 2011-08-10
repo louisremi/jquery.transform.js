@@ -434,7 +434,7 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
-		scaleX = scaleY = skew = 0;
+		B = A = scaleX = scaleY = skew = 0;
 	}
 
 	return {
