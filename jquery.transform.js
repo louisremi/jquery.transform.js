@@ -130,7 +130,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			var elemStyle = elem.style,
 				currentStyle,
 				Matrix,
-				filter;
+				filter,
+				centerOrigin;
 
 			if ( !animate ) {
 				elemStyle.zoom = 1;
@@ -433,7 +434,7 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
-		rotate = scaleX = scaleY = skew = 0;
+		scaleX = scaleY = skew = 0;
 	}
 
 	return {
