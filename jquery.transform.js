@@ -29,13 +29,12 @@ var div = document.createElement("div"),
 		"O" + suffix,
 		"ms" + suffix,
 		"Webkit" + suffix,
-		"Moz" + suffix,
-		// prefix-less property
-		propertyName
+		"Moz" + suffix
 	],
 	i = testProperties.length,
 	supportProperty,
 	supportMatrixFilter,
+	supportFloat32Array = "Float32Array" in window,
 	propertyHook,
 	propertyGet,
 	rMatrix = /Matrix([^)]*)/;
@@ -175,7 +174,7 @@ if ( propertyHook ) {
 	$.cssHooks[propertyName] = propertyHook;
 }
 // we need a unique setter for the animation logic
-propertyGet = propertyHook && propertyHook.get || $.css;
+propertyGet = propertyHook && propertyHook.get || $.css;
 
 /*
  * fn.animate() hooks
@@ -184,7 +183,6 @@ $.fx.step.transform = function( fx ) {
 	var elem = fx.elem,
 		start = fx.start,
 		end = fx.end,
-		split,
 		pos = fx.pos,
 		transform,
 		translate,
@@ -209,15 +207,6 @@ $.fx.step.transform = function( fx ) {
 			elem.style.zoom = 1;
 		}
 
-		// if the start computed matrix is in end, we are doing a relative animation
-		split = end.split(start);
-		if ( split.length == 2 ) {
-			// remove the start computed matrix to make animations more accurate
-			end = split.join("");
-			fx.origin = start;
-			start = "none";
-		}
-
 		// start is either "none" or a matrix(...) that has to be parsed
 		fx.start = start = start == "none"?
 			{
@@ -229,11 +218,7 @@ $.fx.step.transform = function( fx ) {
 			unmatrix( toArray(start) );
 
 		// fx.end has to be parsed and decomposed
-		fx.end = end = ~end.indexOf("matrix")?
-			// bullet-proof parser
-			unmatrix(matrix(end)):
-			// faster and more precise parser
-			components(end);
+		fx.end = end = unmatrix(matrix(end));
 
 		// get rid of properties that do not change
 		for ( prop in start) {
@@ -279,10 +264,7 @@ $.fx.step.transform = function( fx ) {
 		M = true;
 	}
 
-	// In case of relative animation, restore the origin computed matrix here.
-	transform = fx.origin ?
-		fx.origin + translate + skew + scale + rotate:
-		translate + rotate + scale + skew;
+	transform = translate + rotate + scale + skew;
 
 	propertyHook && propertyHook.set ?
 		propertyHook.set( elem, transform, {M: M, T: T} ):
@@ -298,99 +280,99 @@ function matrix( transform ) {
 	transform = transform.split(")");
 	var
 			trim = $.trim
+		, i = -1
 		// last element of the array is an empty string, get rid of it
-		, i = transform.length -1
+		, l = transform.length -1
 		, split, prop, val
-		, A = 1
-		, B = 0
-		, C = 0
-		, D = 1
-		, A_, B_, C_, D_
-		, tmp1, tmp2
-		, X = 0
-		, Y = 0
+		, prev = supportFloat32Array ? new Float32Array(6) : []
+		, curr = supportFloat32Array ? new Float32Array(6) : []
+		, rslt = supportFloat32Array ? new Float32Array(6) : []
 		;
+
+	prev[0] = prev[3] = 1;
+	prev[1] = prev[2] = prev[4] = prev[5] = 0;
+
 	// Loop through the transform properties, parse and multiply them
-	while ( i-- ) {
+	while ( ++i < l ) {
 		split = transform[i].split("(");
 		prop = trim(split[0]);
 		val = split[1];
-		A_ = B_ = C_ = D_ = 0;
+		curr[0] = curr[3] = 1;
+		curr[1] = curr[2] = curr[4] = curr[5] = 0;
 
 		switch (prop) {
 			case "translateX":
-				X += parseInt(val, 10);
-				continue;
+				curr[4] = parseInt(val, 10);
+				break;
 
 			case "translateY":
-				Y += parseInt(val, 10);
-				continue;
+				curr[5] = parseInt(val, 10);
+				break;
 
 			case "translate":
 				val = val.split(",");
-				X += parseInt(val[0], 10);
-				Y += parseInt(val[1] || 0, 10);
-				continue;
+				curr[4] = parseInt(val[0], 10);
+				curr[5] = parseInt(val[1] || 0, 10);
+				break;
 
 			case "rotate":
 				val = toRadian(val);
-				A_ = Math.cos(val);
-				B_ = Math.sin(val);
-				C_ = -Math.sin(val);
-				D_ = Math.cos(val);
+				curr[0] = Math.cos(val);
+				curr[1] = Math.sin(val);
+				curr[2] = -Math.sin(val);
+				curr[3] = Math.cos(val);
 				break;
 
 			case "scaleX":
-				A_ = val;
-				D_ = 1;
+				curr[0] = +val;
 				break;
 
 			case "scaleY":
-				A_ = 1;
-				D_ = val;
+				curr[3] = val;
 				break;
 
 			case "scale":
 				val = val.split(",");
-				A_ = val[0];
-				D_ = val.length>1 ? val[1] : val[0];
+				curr[0] = val[0];
+				curr[3] = val.length>1 ? val[1] : val[0];
 				break;
 
 			case "skewX":
-				A_ = D_ = 1;
-				C_ = Math.tan(toRadian(val));
+				curr[2] = Math.tan(toRadian(val));
 				break;
 
 			case "skewY":
-				A_ = D_ = 1;
-				B_ = Math.tan(toRadian(val));
+				curr[1] = Math.tan(toRadian(val));
 				break;
 
 			case "skew":
-				A_ = D_ = 1;
 				val = val.split(",");
-				C_ = Math.tan(toRadian(val[0]));
-				B_ = Math.tan(toRadian(val[1] || 0));
+				curr[2] = Math.tan(toRadian(val[0]));
+				curr[1] = Math.tan(toRadian(val[1] || 0));
 				break;
 
 			case "matrix":
 				val = val.split(",");
-				A_ = +val[0];
-				B_ = +val[1];
-				C_ = +val[2];
-				D_ = +val[3];
-				X += parseInt(val[4], 10);
-				Y += parseInt(val[5], 10);
+				curr[0] = val[0];
+				curr[1] = val[1];
+				curr[2] = val[2];
+				curr[3] = val[3];
+				curr[4] = parseInt(val[4], 10);
+				curr[5] = parseInt(val[5], 10);
+				break;
 		}
+
 		// Matrix product
-		tmp1 = A * A_ + B * C_;
-		B    = A * B_ + B * D_;
-		tmp2 = C * A_ + D * C_;
-		D    = C * B_ + D * D_;
-		A = tmp1;
-		C = tmp2;
+		rslt[0] = prev[0] * curr[0] + prev[1] * curr[2];
+		rslt[1] = prev[0] * curr[1] + prev[1] * curr[3];
+		rslt[2] = prev[2] * curr[0] + prev[3] * curr[2];
+		rslt[3] = prev[2] * curr[1] + prev[3] * curr[3];
+		rslt[4] = prev[0] * curr[4] + prev[1] * curr[5] + prev[4];
+		rslt[5] = prev[2] * curr[4] + prev[3] * curr[5] + prev[5];
+
+		prev = rslt;
 	}
-	return [A,B,C,D,X,Y];
+	return rslt;
 }
 
 // turns a matrix into its rotate, scale and skew components
@@ -442,79 +424,6 @@ function unmatrix(matrix) {
 		scale: [scaleX, scaleY],
 		skew: [skew, 0]
 	}
-}
-
-// parse transform components of a transform string not containing "matrix(...)"
-function components( transform ) {
-	// split the != transforms
-	transform = transform.split(")");
-
-	var translate = [0,0],
-		rotate = 0,
-		scale = [1,1],
-		skew = [0,0],
-		i = transform.length -1,
-		trim = $.trim,
-		split, value;
-
-	// add components
-	while ( i-- ) {
-		split = transform[i].split("(");
-		value = split[1];
-
-		switch ( trim(split[0]) ) {
-			case "translateX":
-				translate[0] += parseInt(value, 10);
-				break;
-
-			case "translateY":
-				translate[1] += parseInt(value, 10);
-				break;
-
-			case "translate":
-				value = value.split(",");
-				translate[0] += parseInt(value[0], 10);
-				translate[1] += parseInt(value[1] || 0, 10);
-				break;
-
-			case "rotate":
-				rotate += toRadian(value);
-				break;
-
-			case "scaleX":
-				scale[0] *= value;
-
-			case "scaleY":
-				scale[1] *= value;
-
-			case "scale":
-				value = value.split(",");
-				scale[0] *= value[0];
-				scale[1] *= (value.length>1? value[1] : value[0]);
-				break;
-
-			case "skewX":
-				skew[0] += toRadian(value);
-				break;
-
-			case "skewY":
-				skew[1] += toRadian(value);
-				break;
-
-			case "skew":
-				value = value.split(",");
-				skew[0] += toRadian(value[0]);
-				skew[1] += toRadian(value[1] || "0");
-				break;
-		}
-	}
-
-	return {
-		translate: translate,
-		rotate: rotate,
-		scale: scale,
-		skew: skew
-	};
 }
 
 // converts an angle string in any unit to a radian Float
