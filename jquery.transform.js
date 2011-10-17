@@ -370,8 +370,6 @@ function matrix( transform ) {
 		rslt[4] = prev[0] * curr[4] + prev[1] * curr[5] + prev[4];
 		rslt[5] = prev[2] * curr[4] + prev[3] * curr[5] + prev[5];
 
-console.log(prev.toSource(), curr.toSource(), rslt.toSource() )
-
 		prev = rslt;
 	}
 	return rslt;
