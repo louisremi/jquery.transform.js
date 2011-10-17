@@ -193,7 +193,6 @@ $.fx.step.transform = function( fx ) {
 		M = false,
 		prop;
 	translate = rotate = scale = skew = "";
-
 	// fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
 	// so that we can interpolate them
 	if ( !start || typeof start === "string" ) {
@@ -286,10 +285,10 @@ function matrix( transform ) {
 		, split, prop, val
 		, prev = supportFloat32Array ? new Float32Array(6) : []
 		, curr = supportFloat32Array ? new Float32Array(6) : []
-		, rslt = supportFloat32Array ? new Float32Array(6) : []
+		, rslt = supportFloat32Array ? new Float32Array(6) : [1,0,0,1,0,0]
 		;
 
-	prev[0] = prev[3] = 1;
+	prev[0] = prev[3] = rslt[0] = rslt[3] = 1;
 	prev[1] = prev[2] = prev[4] = prev[5] = 0;
 
 	// Loop through the transform properties, parse and multiply them
