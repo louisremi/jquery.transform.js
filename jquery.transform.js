@@ -254,7 +254,7 @@ $.fx.step.transform = function( fx ) {
 		M = true;
 	}
 
-	transform = translate + scale + rotate + skew;
+	transform = translate + rotate + skew + scale;
 
 	propertyHook && propertyHook.set ?
 		propertyHook.set( elem, transform, {M: M, T: T} ):
