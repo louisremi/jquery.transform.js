@@ -130,7 +130,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			var elemStyle = elem.style,
 				currentStyle,
 				Matrix,
-				filter;
+				filter,
+				centerOrigin;
 
 			if ( !animate ) {
 				elemStyle.zoom = 1;
@@ -194,6 +195,7 @@ $.fx.step.transform = function( fx ) {
 		M = false,
 		prop;
 	translate = rotate = scale = skew = "";
+
 	// fx.end and fx.start need to be converted to their translate/rotate/scale/skew components
 	// so that we can interpolate them
 	if ( !start || typeof start === "string" ) {
