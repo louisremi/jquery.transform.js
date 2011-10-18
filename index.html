@@ -104,11 +104,11 @@ $('#cover').mouseenter(function() {
 			});
 			
 			var transforms = [
-					'skewY(-45deg) scale(.66)',
-					'translate(20px) skewY(-45deg) scale(.66)',
+					'scale(.66) skewY(-45deg)',
+					'translate(20px) scale(.66) skewY(-45deg)',
 					'translate(150px,50px) scale(1.5,1)',
-					'translate(280px) skewY(45deg) scale(.66)',
-					'translate(300px) skewY(45deg) scale(.66)'
+					'translate(280px) scale(.66) skewY(45deg)',
+					'translate(300px) scale(.66) skewY(45deg)'
 				],
 				$squares = $('#basic5678 .square').each(function(i) {
 					$(this).css({ transform: transforms[i] });
