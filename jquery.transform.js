@@ -254,7 +254,7 @@ $.fx.step.transform = function( fx ) {
 		M = true;
 	}
 
-	transform = translate + rotate + scale + skew;
+	transform = translate + scale + rotate + skew;
 
 	propertyHook && propertyHook.set ?
 		propertyHook.set( elem, transform, {M: M, T: T} ):
@@ -373,8 +373,8 @@ function unmatrix(matrix) {
 		, scaleY
 		, skew
 		, A = matrix[0]
-		, B = matrix[2]
-		, C = matrix[1]
+		, B = matrix[1]
+		, C = matrix[2]
 		, D = matrix[3]
 		;
 
@@ -405,8 +405,7 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
-		rotate = skew = 0;
-		scaleX = scaleY = 1;
+		throw new Error("matrix is singular");
 	}
 
 	return {
