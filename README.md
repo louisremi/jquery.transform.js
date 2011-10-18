@@ -24,8 +24,7 @@ You can use the following list of transform components:
 - `matrix(<number>, <number>, <number>, <number>, <number>, <number>)`*
 
 *`matrix` gives you more control about the resulting transformation, using a [matrix construction set](http://www.useragentman.com/matrix/).  
-When using it in animations however, it makes it impossible to predict how the current and target transformations are going to be interpolated; there is no way to tell whether elements are going to rotate clockwise or anti-clockwise for instance.  
-`matrix` cannot be used with jquery.transform.light.js
+When using it in animations however, it makes it impossible to predict how the current and target transformations are going to be interpolated; there is no way to tell whether elements are going to rotate clockwise or anti-clockwise for instance.
 
 Get transform
 -------------
