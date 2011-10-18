@@ -72,7 +72,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 					// remove "px" from the computed matrix
 					$.css( elem, supportProperty ).split("px").join(""):
 					elem.style[supportProperty]
-				)
+				);
 			},
 			set: function( elem, value ) {
 				// add "px" to matrices
@@ -80,7 +80,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 					value.replace(/matrix((?:[^,]*,){4})([^,]*),([^)]*)/, "matrix$1$2px,$3px"):
 					value;
 			}
-		}
+		};
 	/* Fix two jQuery bugs still present in 1.5.1
 	 * - rupper is incompatible with IE9, see http://jqbug.com/8346
 	 * - jQuery.css is not really jQuery.cssProps aware, see http://jqbug.com/8402
@@ -91,9 +91,9 @@ if ( supportProperty && supportProperty != propertyName ) {
 				return (computed ?
 					$.css( elem, supportProperty.replace(/^ms/, "Ms") ):
 					elem.style[supportProperty]
-				)
+				);
 			}
-		}
+		};
 	}
 	/* TODO: leverage hardware acceleration of 3d transform in Webkit only
 	else if ( supportProperty == "Webkit" + suffix && support3dTransform ) {
@@ -169,7 +169,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 				elemStyle.top = value[5] + "px";
 			}
 		}
-	}
+	};
 }
 // populate jQuery.cssHooks with the appropriate hook if necessary
 if ( propertyHook ) {
@@ -415,7 +415,7 @@ function unmatrix(matrix) {
 		rotate: Math.atan2(B, A),
 		scale: [scaleX, scaleY],
 		skew: [Math.atan(skew), 0]
-	}
+	};
 }
 
 // converts an angle string in any unit to a radian Float
