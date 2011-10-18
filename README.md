@@ -1,4 +1,4 @@
-jquery.transform.js and jquery.transform.light.js are two plugins that add 2d transform capabilities to jQuery `css()` and `animate()` functions.
+jquery.transform2d.js adds 2d transform capabilities to jQuery `css()` and `animate()` functions.
 
 Usage:
 ======
@@ -30,53 +30,16 @@ When using it in animations however, it makes it impossible to predict how the c
 Get transform
 -------------
 
-**jquery.transform.light.js** returns an object containing the different transform components of an element. It is only aware of transformations set through jQuery.
-
-    $('#myDiv').css('transform') == {
-    	// array of X and Y in pixels
-    	translate: [100, 50],
-    	// rotate in radians
-    	rotate: 1.5707963267948966,
-    	// array of X and Y
-    	scale: [2, 0.5],
-    	// array of X and Y in radians
-    	skew: [0,0]
-    };
-
-To convert radians back to degrees, the following helper can be used:
-
-    $.transform.radToDeg( 1.5707963267948966 ) == 90;
-
-**jquery.transform.js** returns a computed transform matrix.
+returns a computed transform matrix.
 
     $('#myDiv').css('transform') == 'matrix(0,1,-1,0,100,50)';
-
-Note that with **both plugins**, it is possible to reuse directly the output of this method to create *relative* transformation.
-
-    var currentTransform = $('#myDiv').css('transform');
-    $('#myDiv').animate({ transform: currentTransform + 'rotate(90deg)' });
 
 Limitations:
 ============
 
-Both plugins have the following limitations:
-
 - requires jQuery 1.4.3+,
 - Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE**,
 - transformOrigin is not accessible.
-
-The **light** has the following additional limitations:
-
-- `matrix(...)` cannot be used,
-- transformations set through other plugins, raw DOM manipulation or stylesheets are ignored: animating or accessing current style would fail,
-- incompatible with [jquery.transition.js](https://github.com/lrbabe/jquery.transition.js).
-
-Light or not light?
--------------------
-
-Although the *light* version has more limitations than the *full* version, it has a smaller file-size and is less CPU intensive.  
-Transformation interpolation (i.e. animations) will also be more accurate in the *light* version, since matrices are excluded.  
-It is recommanded to start with the *light* version and then switch to *full* one when the need really arises.
 
 Why such restrictions with 'translate'?
 ---------------------------------------
