@@ -16,7 +16,7 @@
  * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  *
  */
-(function( $ ) {
+(function( $, window, document, Math ) {
 "use strict";
 
 /*
@@ -51,8 +51,6 @@ while ( i-- ) {
 if ( !supportProperty ) {
 	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === "";
 }
-// prevent IE memory leak
-div = divStyle = null;
 
 // px isn't the default unit of this property
 $.cssNumber[propertyName] = true;
@@ -212,10 +210,10 @@ $.fx.step.transform = function( fx ) {
 		// start is either "none" or a matrix(...) that has to be parsed
 		fx.start = start = start == "none"?
 			{
-				translate: [0,0],
-				rotate: 0,
-				scale: [1,1],
-				skew: [0,0]
+				t: [0,0],
+				r: 0,
+				s: [1,1],
+				k: [0,0]
 			}:
 			unmatrix( toArray(start) );
 
@@ -229,29 +227,29 @@ $.fx.step.transform = function( fx ) {
 	 * - avoid $.each(function(){})
 	 * - round values using bitewise hacks, see http://jsperf.com/math-round-vs-hack/3
 	 */
-	if ( start.translate[0] || end.translate[0] || start.translate[1] || end.translate[1] ) {
+	if ( start.t[0] || end.t[0] || start.t[1] || end.t[1] ) {
 		// round translate to the closest pixel
 		translate = " translate("+
-			((start.translate[0] + (end.translate[0] - start.translate[0]) * pos + .5) | 0) +"px,"+
-			((start.translate[1] + (end.translate[1] - start.translate[1]) * pos + .5) | 0) +"px"+
+			((start.t[0] + (end.t[0] - start.t[0]) * pos + .5) | 0) +"px,"+
+			((start.t[1] + (end.t[1] - start.t[1]) * pos + .5) | 0) +"px"+
 		")";
 		T = true;
 	}
-	if ( start.rotate || end.rotate ) {
-		rotate = " rotate("+ (start.rotate + (end.rotate - start.rotate) * pos) +"rad)";
+	if ( start.r || end.r ) {
+		rotate = " rotate("+ (start.r + (end.r - start.r) * pos) +"rad)";
 		M = true;
 	}
-	if ( start.scale[0]-1 || end.scale[0]-1 || start.scale[1]-1 || end.scale[1]-1 ) {
+	if ( start.s[0]-1 || end.s[0]-1 || start.s[1]-1 || end.s[1]-1 ) {
 		scale = " scale("+
-			(start.scale[0] + (end.scale[0] - start.scale[0]) * pos) +","+
-			(start.scale[1] + (end.scale[1] - start.scale[1]) * pos) +
+			(start.s[0] + (end.s[0] - start.s[0]) * pos) +","+
+			(start.s[1] + (end.s[1] - start.s[1]) * pos) +
 		")";
 		M = true;
 	}
-	if ( start.skew[0] || end.skew[0] || start.skew[1] || end.skew[1] ) {
+	if ( start.k[0] || end.k[0] || start.k[1] || end.k[1] ) {
 		skew = " skew("+
-			(start.skew[0] + (end.skew[0] - start.skew[0]) * pos) +"rad,"+
-			(start.skew[1] + (end.skew[1] - start.skew[1]) * pos) +"rad"+
+			(start.k[0] + (end.k[0] - start.k[0]) * pos) +"rad,"+
+			(start.k[1] + (end.k[1] - start.k[1]) * pos) +"rad"+
 		")";
 		M = true;
 	}
@@ -411,10 +409,10 @@ function unmatrix(matrix) {
 	}
 
 	return {
-		translate: [+matrix[4], +matrix[5]],
-		rotate: Math.atan2(B, A),
-		scale: [scaleX, scaleY],
-		skew: [Math.atan(skew), 0]
+		t: [+matrix[4], +matrix[5]],
+		r: Math.atan2(B, A),
+		s: [scaleX, scaleY],
+		k: [Math.atan(skew), 0]
 	};
 }
 
@@ -438,4 +436,4 @@ $.transform = {
 	centerOrigin: "margin"
 };
 
-})( jQuery );
+})( jQuery, window, document, Math );
