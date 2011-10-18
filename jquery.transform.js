@@ -17,6 +17,7 @@
  *
  */
 (function( $ ) {
+"use strict";
 
 /*
  * Feature tests and global variables
@@ -218,16 +219,6 @@ $.fx.step.transform = function( fx ) {
 
 		// fx.end has to be parsed and decomposed
 		fx.end = end = unmatrix(matrix(end));
-
-		// get rid of properties that do not change
-		for ( prop in start) {
-			if ( prop == "rotate" ?
-				start[prop] == end[prop]:
-				start[prop][0] == end[prop][0] && start[prop][1] == end[prop][1]
-			) {
-				delete start[prop];
-			}
-		}
 	}
 
 	/*
@@ -236,7 +227,7 @@ $.fx.step.transform = function( fx ) {
 	 * - avoid $.each(function(){})
 	 * - round values using bitewise hacks, see http://jsperf.com/math-round-vs-hack/3
 	 */
-	if ( start.translate ) {
+	if ( start.translate[0] || end.translate[0] || start.translate[1] || end.translate[1] ) {
 		// round translate to the closest pixel
 		translate = " translate("+
 			((start.translate[0] + (end.translate[0] - start.translate[0]) * pos + .5) | 0) +"px,"+
@@ -244,18 +235,18 @@ $.fx.step.transform = function( fx ) {
 		")";
 		T = true;
 	}
-	if ( start.rotate != undefined ) {
+	if ( start.rotate || end.rotate ) {
 		rotate = " rotate("+ (start.rotate + (end.rotate - start.rotate) * pos) +"rad)";
 		M = true;
 	}
-	if ( start.scale ) {
+	if ( start.scale[0]-1 || end.scale[0]-1 || start.scale[1]-1 || end.scale[1]-1 ) {
 		scale = " scale("+
 			(start.scale[0] + (end.scale[0] - start.scale[0]) * pos) +","+
 			(start.scale[1] + (end.scale[1] - start.scale[1]) * pos) +
 		")";
 		M = true;
 	}
-	if ( start.skew ) {
+	if ( start.skew[0] || end.skew[0] || start.skew[1] || end.skew[1] ) {
 		skew = " skew("+
 			(start.skew[0] + (end.skew[0] - start.skew[0]) * pos) +"rad,"+
 			(start.skew[1] + (end.skew[1] - start.skew[1]) * pos) +"rad"+
@@ -382,8 +373,8 @@ function unmatrix(matrix) {
 		, scaleY
 		, skew
 		, A = matrix[0]
-		, B = matrix[1]
-		, C = matrix[2]
+		, B = matrix[2]
+		, C = matrix[1]
 		, D = matrix[3]
 		;
 
@@ -414,14 +405,15 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
-		rotate = scaleX = scaleY = skew = 0;
+		rotate = skew = 0;
+		scaleX = scaleY = 1;
 	}
 
 	return {
 		translate: [+matrix[4], +matrix[5]],
 		rotate: Math.atan2(B, A),
 		scale: [scaleX, scaleY],
-		skew: [skew, 0]
+		skew: [Math.atan(skew), 0]
 	}
 }
 
