@@ -254,6 +254,8 @@ $.fx.step.transform = function( fx ) {
 		M = true;
 	}
 
+	// The recomposition order is very important
+	// see http://hg.mozilla.org/mozilla-central/file/7cb3e9795d04/layout/style/nsStyleAnimation.cpp#l971
 	transform = translate + rotate + skew + scale;
 
 	propertyHook && propertyHook.set ?
