@@ -235,7 +235,7 @@ $.fx.step.transform = function( fx ) {
 		")";
 		T = true;
 	}
-	if ( start.r || end.r ) {
+	if ( start.r || end.r ) {
 		rotate = " rotate("+ (start.r + (end.r - start.r) * pos) +"rad)";
 		M = true;
 	}
