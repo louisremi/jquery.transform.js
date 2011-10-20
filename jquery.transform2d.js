@@ -360,7 +360,7 @@ function matrix( transform ) {
 		rslt[4] = prev[0] * curr[4] + prev[1] * curr[5] + prev[4];
 		rslt[5] = prev[2] * curr[4] + prev[3] * curr[5] + prev[5];
 
-		prev = rslt;
+		prev = [rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5]];
 	}
 	return rslt;
 }
