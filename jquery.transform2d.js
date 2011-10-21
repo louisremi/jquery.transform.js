@@ -130,7 +130,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 			matrix[5] = elemStyle ? elemStyle.top : 0;
 			return _matrix+"(" + matrix + ")";
 		},
-		set: function( elem, value ) {
+		set: function( elem, value, animate ) {
 			var elemStyle = elem.style,
 				currentStyle,
 				Matrix,
@@ -241,7 +241,7 @@ $.fx.step.transform = function( fx ) {
 	fx.origin && ( transform = fx.origin + transform );
 
 	propertyHook && propertyHook.set ?
-		propertyHook.set( elem, transform ):
+		propertyHook.set( elem, transform, +true ):
 		elem.style[supportProperty] = transform;
 };
 
