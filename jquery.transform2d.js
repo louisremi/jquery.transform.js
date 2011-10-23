@@ -218,13 +218,14 @@ $.fx.step.transform = function( fx ) {
 	while ( i-- ) {
 		startVal = start[i];
 		endVal = end[i];
+		unit = +false;
 
 		switch ( startVal[0] ) {
 
 			case _translate:
 				unit = "px";
 			case _scale:
-				unit || ( unit = "");
+				unit || ( unit = " ");
 			case _skew:
 				unit || ( unit = "rad" );
 
