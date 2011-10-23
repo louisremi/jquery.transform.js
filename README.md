@@ -6,8 +6,8 @@ Usage:
 Set transform with a string
 ---------------------------
 
-    $('#myDiv').css('transform', 'translate(50px, 30px) rotate(25deg) scale(2,.5) skew(-35deg)');
-    $('#myDiv').animate({transform: 'translateY(-100px) rotate(1rad) scaleX(2) skewY(42deg)'});
+    $(elem).css('transform', 'translate(50px, 30px) rotate(25deg) scale(2,.5) skew(-35deg)');
+    $(elem).animate({transform: 'translateY(-100px) rotate(1rad) scaleX(2) skewY(42deg)'});
 
 You can use the following list of transform components:
 
@@ -31,7 +31,16 @@ Get transform
 
 returns a computed transform matrix.
 
-    $('#myDiv').css('transform') == 'matrix(0,1,-1,0,100,50)';
+    $(elem).css('transform') == 'matrix(0,1,-1,0,100,50)';
+
+Relative animations
+-------------------
+
+Relative animations are possible by prepending "+=" at the end of the transform string.
+
+    $(elem).css('transform', 'rotate(45deg)');
+    // using the following syntax, elem will always rotate 90deg anticlockwise
+    $(elem).animate({transform: '+=rotate(-90deg)'});
 
 Limitations:
 ============
