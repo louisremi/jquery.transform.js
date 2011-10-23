@@ -194,6 +194,7 @@ $.fx.step.transform = function( fx ) {
 
 	// fx.end and fx.start need to be converted to interpolation lists
 	if ( !start || typeof start === "string" ) {
+
 		// the following block can be commented out with jQuery 1.5.1+, see #7912
 		if ( !start ) {
 			start = propertyGet( elem, supportProperty );
@@ -203,6 +204,9 @@ $.fx.step.transform = function( fx ) {
 		if ( supportMatrixFilter ) {
 			elem.style.zoom = 1;
 		}
+
+		// replace "+=" in relative animations (-= is meaningless with transforms)
+		end = end.split("+=").join(start);
 
 		// parse both transform to generate interpolation list of same length
 		return $.extend( fx, interpolationList( start, end ) );
