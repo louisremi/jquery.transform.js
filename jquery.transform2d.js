@@ -327,7 +327,7 @@ function matrix( transform ) {
 			case _skew:
 				val = val.split(",");
 				curr[2] = Math.tan(toRadian(val[0]));
-				curr[1] = Math.tan(toRadian(val[1] || 0));
+				val[1] && ( curr[1] = Math.tan(toRadian(val[1])) );
 				break;
 
 			case _matrix:
