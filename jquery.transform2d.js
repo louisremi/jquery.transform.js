@@ -110,9 +110,14 @@ if ( supportProperty && supportProperty != propertyName ) {
 	}*/
 	
 } else if ( supportMatrixFilter ) {
+	var translateX = suffix + '-translate-x',
+		translateY = suffix + '-translate-y'
+	;
+	
 	propertyHook = {
 		get: function( elem, computed ) {
-			var elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
+			var $elem = $(elem),
+				elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
 				matrix;
 
 			if ( elemStyle && rMatrix.test( elemStyle.filter ) ) {
@@ -126,12 +131,13 @@ if ( supportProperty && supportProperty != propertyName ) {
 			} else {
 				matrix = [1,0,0,1];
 			}
-			matrix[4] = elemStyle ? elemStyle.left : 0;
-			matrix[5] = elemStyle ? elemStyle.top : 0;
+			matrix[4] = $elem.data(translateX) || 0;
+			matrix[5] = $elem.data(translateY) || 0;
 			return _matrix+"(" + matrix + ")";
 		},
 		set: function( elem, value, animate ) {
-			var elemStyle = elem.style,
+			var $elem = $(elem),
+				elemStyle = elem.style,
 				currentStyle,
 				Matrix,
 				filter,
@@ -159,19 +165,144 @@ if ( supportProperty && supportProperty != propertyName ) {
 					filter.replace(rMatrix, Matrix) :
 					filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
 
-				// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
-				if ( (centerOrigin = $.transform.centerOrigin) ) {
-					elemStyle[centerOrigin == "margin" ? "marginLeft" : "left"] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + "px";
-					elemStyle[centerOrigin == "margin" ? "marginTop" : "top"] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + "px";
+				// remember the translation for later
+				$elem.data(translateX, value[4]);
+				$elem.data(translateY, value[5]);
+				
+				// fake the origin
+				$.cssHooks.transformOrigin.set(elem);
+			//}
+		}
+	};
+	
+	
+	// handle transform-origin
+	var rperc = /%/,
+		originSuffix = 'transform-origin'
+	;
+	$.cssHooks.transformOrigin = {
+		get: function( elem, computed ) {
+			var $elem = $(elem),
+				origin = $elem.data(originSuffix)
+			;
+			
+			// try to look it up in the existing CSS
+			if (!origin) {
+				var testProperties = [
+						'-o-' + originSuffix,
+						'-moz-' + originSuffix,
+						'-webkit-' + originSuffix,
+						'-ms-' + originSuffix,
+						originSuffix
+					],
+					i = testProperties.length,
+					currStyle = elem.currentStyle
+				;
+				
+				while ( i-- ) {
+					if ( testProperties[i] in currStyle ) {
+						origin = currStyle[testProperties[i]];
+						$elem.data(originSuffix, origin);
+						break;
+					}
 				}
-			//}
-
-			// translate
-			//if ( !animate || animate.T ) {
-				// We assume that the elements are absolute positionned inside a relative positionned wrapper
-				elemStyle.left = value[4] + "px";
-				elemStyle.top = value[5] + "px";
-			//}
+			}
+			
+			// otherwise use the default
+			if (!origin) {
+				origin = 'center center';
+				$elem.data(originSuffix, origin);
+			}
+			
+			return origin;
+		},
+		
+		set: function( elem, value, animate ) {
+			var $elem = $(elem),
+				transform = $elem.css('transform')
+			;
+			
+			// save it if there's a new value
+			// NOTE: undefined means we're trying to set a transform and need to handle translation
+			if (value === undefined) { $elem.data(originSuffix, value) }
+			
+			// if there's no transform, don't do anything
+			if (!transform) {
+				return;
+			}
+			
+			// convert the transform into a useful array
+			transform = matrix(transform);
+			
+			// fake the origin with some fancy css
+			// we also fake the translation here
+			var tx = transform[4] || $elem.data(translateX) || 0,
+				ty = transform[5] || $elem.data(translateY) || 0,
+				cssPosition = $elem.css('position'),
+				origin = (value === undefined ? $.cssHooks.transformOrigin.get(elem) : value).split(' ')
+			;
+			
+			// correct for keyword lengths
+			switch (origin[0]) {
+				case 'left': origin[0] = '0'; break;
+				case 'right': origin[0] = '100%'; break;
+				case 'center': // no break
+				case undefined: origin[0] = '50%';
+			}
+			switch (origin[1]) {
+				case 'top': origin[1] = '0'; break;
+				case 'bottom': origin[1] = '100%'; break;
+				case 'center': // no break
+				case undefined: origin[1] = '50%'; //TODO: does this work?
+			}
+			
+			// calculate and return the correct size			
+			////////////////////////////////////////////////////////////////
+			// find the real height of the original object
+			var ratio = transformOffset(transform, 1, 1),				
+				width = $elem.outerWidth() / ratio.width,
+				height = $elem.outerHeight() / ratio.height
+			;
+			
+			// turn the origin into unitless pixels
+			// TODO: correct for non-px lengths
+			// TODO: ems would be easy
+			origin[0] = rperc.test(origin[0]) ? parseFloat(origin[0])/100*width : parseFloat(origin[0]);
+			origin[1] = rperc.test(origin[1]) ? parseFloat(origin[1])/100*height : parseFloat(origin[1]);
+			
+			// find the origin offset
+			var	toCenter = transformVector(transform,origin[0], origin[1]),
+				fromCenter = transformVector(transform, 0, 0),
+				offset = {
+					top: (fromCenter[1]) - (toCenter[1] - origin[1]),
+					left: (fromCenter[0]) - (toCenter[0] - origin[0])
+				},
+				// IE glues the top-most and left-most pixels of the transformed object to top/left of the original object
+				sides = transformSides(transform, width, height)
+			;
+			///////////////////////////////////////////////////////////////
+			
+			//TODO: if the element is already positioned, we should attempt to respect it (somehow)
+			
+			// apply the css
+			var css,
+				top = offset.top + ty + sides.top,
+				left = offset.left + tx + sides.left
+			;
+			
+			if (cssPosition === 'absolute' || cssPosition === 'fixed') {
+				css = {
+					marginTop: top,
+					marginLeft: left
+				}
+			} else {
+				css = {
+					position: 'relative',
+					top: top,
+					left: left
+				}
+			}
+			$elem.css(css);
 		}
 	};
 }
@@ -253,12 +384,56 @@ $.fx.step.transform = function( fx ) {
 /*
  * Utility functions
  */
+// convert a vector
+function transformVector(a, x, y) {
+	return [
+		a[0] * x + a[2] * y,
+		a[1] * x + a[3] * y
+	];		
+}
+	
+// calculate the corner vectors
+function transformCorners(a, x, y) {
+	return [
+		/* tl */ transformVector(a, 0, 0),
+		/* bl */ transformVector(a, 0, y),
+		/* tr */ transformVector(a, x, 0),
+		/* br */ transformVector(a, x, y)
+	];
+}
+	
+// measure the length of the sides
+// TODO: arrays are faster than objects
+function transformSides(a, x, y) {
+	// The corners of the box
+	var c = transformCorners(a, x, y);
+	
+	return {
+		top: Math.min(c[0][1], c[2][1], c[3][1], c[1][1]),
+		bottom: Math.max(c[0][1], c[2][1], c[3][1], c[1][1]),
+		left: Math.min(c[0][0], c[2][0], c[3][0], c[1][0]),
+		right: Math.max(c[0][0], c[2][0], c[3][0], c[1][0])
+	};
+}
+	
+// measure the offset height and width
+// TODO: arrays are faster than objects
+function transformOffset(a, x, y) {
+	// The sides of the box
+	var s = transformSides(a, x, y);
+	
+	// return offset
+	return {
+		height: Math.abs(s.bottom - s.top), 
+		width: Math.abs(s.right - s.left)
+	};
+}
 
 // turns a transform string into its "matrix(A,B,C,D,X,Y)" form (as an array, though)
+// column-major order
 function matrix( transform ) {
 	transform = transform.split(")");
-	var
-			trim = $.trim
+	var trim = $.trim
 		, i = -1
 		// last element of the array is an empty string, get rid of it
 		, l = transform.length -1
@@ -267,7 +442,7 @@ function matrix( transform ) {
 		, curr = supportFloat32Array ? new Float32Array(6) : []
 		, rslt = supportFloat32Array ? new Float32Array(6) : [1,0,0,1,0,0]
 		;
-
+	
 	prev[0] = prev[3] = rslt[0] = rslt[3] = 1;
 	prev[1] = prev[2] = prev[4] = prev[5] = 0;
 
@@ -341,13 +516,13 @@ function matrix( transform ) {
 				break;
 		}
 
-		// Matrix product
-		rslt[0] = prev[0] * curr[0] + prev[1] * curr[2];
-		rslt[1] = prev[0] * curr[1] + prev[1] * curr[3];
-		rslt[2] = prev[2] * curr[0] + prev[3] * curr[2];
-		rslt[3] = prev[2] * curr[1] + prev[3] * curr[3];
-		rslt[4] = prev[2] * curr[5] + prev[3] * curr[4] + prev[4];
-		rslt[5] = prev[0] * curr[5] + prev[1] * curr[4] + prev[5];
+		// Matrix product (array is in column-major order!)
+		rslt[0] = prev[0] * curr[0] + prev[2] * curr[1];
+		rslt[1] = prev[1] * curr[0] + prev[3] * curr[1];
+		rslt[2] = prev[0] * curr[2] + prev[2] * curr[3];
+		rslt[3] = prev[1] * curr[2] + prev[3] * curr[3];
+		rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
+		rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
 
 		prev = [rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5]];
 	}
@@ -357,8 +532,7 @@ function matrix( transform ) {
 // turns a matrix into its rotate, scale and skew components
 // algorithm from http://hg.mozilla.org/mozilla-central/file/7cb3e9795d04/layout/style/nsStyleAnimation.cpp
 function unmatrix(matrix) {
-	var
-			scaleX
+	var scaleX
 		, scaleY
 		, skew
 		, A = matrix[0]
