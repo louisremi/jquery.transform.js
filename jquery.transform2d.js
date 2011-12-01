@@ -238,11 +238,11 @@ if ( supportProperty && supportProperty != propertyName ) {
 			// we also fake the translation here
 			var tx = transform[4] || $elem.data(translateX) || 0,
 				ty = transform[5] || $elem.data(translateY) || 0,
-				cssPosition = $elem.css('position'),
 				origin = (value === undefined ? $.cssHooks.transformOrigin.get(elem) : value).split(' ')
 			;
 			
 			// correct for keyword lengths
+			// TODO: the keywords are allowed to be transposed
 			switch (origin[0]) {
 				case 'left': origin[0] = '0'; break;
 				case 'right': origin[0] = '100%'; break;
@@ -253,12 +253,13 @@ if ( supportProperty && supportProperty != propertyName ) {
 				case 'top': origin[1] = '0'; break;
 				case 'bottom': origin[1] = '100%'; break;
 				case 'center': // no break
-				case undefined: origin[1] = '50%'; //TODO: does this work?
+				case undefined: origin[1] = '50%';
 			}
 			
-			// calculate and return the correct size			
-			////////////////////////////////////////////////////////////////
-			// find the real height of the original object
+			// calculate and return the correct size
+			// find the real size of the original object
+			// (IE reports the size of the transformed object)
+			// the ratio is basically the transformed size of 1x1 object
 			var ratio = transformOffset(transform, 1, 1),				
 				width = $elem.outerWidth() / ratio.width,
 				height = $elem.outerHeight() / ratio.height
@@ -266,40 +267,61 @@ if ( supportProperty && supportProperty != propertyName ) {
 			
 			// turn the origin into unitless pixels
 			// TODO: correct for non-px lengths
-			// TODO: ems would be easy
+			// TODO: ems would be easy enough to handle
 			origin[0] = rperc.test(origin[0]) ? parseFloat(origin[0])/100*width : parseFloat(origin[0]);
 			origin[1] = rperc.test(origin[1]) ? parseFloat(origin[1])/100*height : parseFloat(origin[1]);
 			
 			// find the origin offset
-			var	toCenter = transformVector(transform,origin[0], origin[1]),
+			var	toCenter = transformVector(transform, origin[0], origin[1]),
 				fromCenter = transformVector(transform, 0, 0),
 				offset = {
 					top: (fromCenter[1]) - (toCenter[1] - origin[1]),
 					left: (fromCenter[0]) - (toCenter[0] - origin[0])
 				},
-				// IE glues the top-most and left-most pixels of the transformed object to top/left of the original object
 				sides = transformSides(transform, width, height)
 			;
-			///////////////////////////////////////////////////////////////
-			
-			//TODO: if the element is already positioned, we should attempt to respect it (somehow)
 			
 			// apply the css
-			var css,
+			var cssPosition = $elem.css('position'),
+				css,
 				top = offset.top + ty + sides.top,
 				left = offset.left + tx + sides.left
 			;
 			
-			if (cssPosition === 'absolute' || cssPosition === 'fixed') {
+			if ($.transform.centerOrigin === 'margin' || cssPosition === 'absolute' || cssPosition === 'fixed') {
+				// use margin positioning for positioned elements
 				css = {
 					marginTop: top,
 					marginLeft: left
 				}
 			} else {
+				// try to respect an existing top/left if it's in the CSS
+				var cssTop = 0,
+					cssLeft = 0
+				;
+				
+				// look it up for position relative items
+				if (cssPosition !== 'static') {
+					// blank out the inline styles, we're going to overwrite them anyway
+					elem.style.top = null;
+					elem.style.left = null;
+					
+					// look up the CSS styles
+					var currentTop = elem.currentStyle.top,
+						currentLeft = elem.currentStyle.left
+					;
+					
+					// if they're not 'auto' then use those
+					// TODO: handle non-pixel units and percentages
+					if (currentTop !== 'auto') { cssTop = parseInt(currentTop, 10); }
+					if (currentLeft !== 'auto') { cssLeft = parseInt(currentLeft, 10); }
+				}
+				
+				// use relative positioning when possible; it's the most like the CSS3 spec.
 				css = {
 					position: 'relative',
-					top: top,
-					left: left
+					top: top + cssTop,
+					left: left + cssLeft
 				}
 			}
 			$elem.css(css);
@@ -711,7 +733,7 @@ function toArray(matrix) {
 }
 
 $.transform = {
-	centerOrigin: "margin"
+	centerOrigin: "position"
 };
 
 })( jQuery, window, document, Math );
