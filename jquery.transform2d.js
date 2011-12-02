@@ -178,7 +178,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 	
 	// handle transform-origin
 	var rperc = /%/,
-		originSuffix = 'transform-origin'
+		originSuffix = propertyName + '-origin'
 	;
 	$.cssHooks.transformOrigin = {
 		get: function( elem, computed ) {
@@ -219,7 +219,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 		
 		set: function( elem, value, animate ) {
 			var $elem = $(elem),
-				transform = $elem.css('transform')
+				transform = $elem.css(propertyName)
 			;
 			
 			// save it if there's a new value
@@ -285,31 +285,46 @@ if ( supportProperty && supportProperty != propertyName ) {
 			var cssPosition = $elem.css('position'),
 				css,
 				top = offset.top + ty + sides.top,
-				left = offset.left + tx + sides.left
+				left = offset.left + tx + sides.left,
+				cssTop = 0,
+				cssLeft = 0,
+				currentTop,
+				currentLeft,
+				elemStyle = elem.style,
+				currStyle = elem.currentStyle
 			;
 			
 			if ($.transform.centerOrigin === 'margin' || cssPosition === 'absolute' || cssPosition === 'fixed') {
+				// try to respect an existing marginTop/Left if it's in the CSS
+				// blank out the inline styles, we're going to overwrite them anyway
+				elemStyle.marginTop = null;
+				elemStyle.marginLeft = null;
+				
+				// look up the CSS styles
+				currentTop = currStyle.marginTop;
+				currentLeft = currStyle.marginLeft;
+				
+				// if they're not 'auto' then use those
+				// TODO: handle non-pixel units and percentages
+				if (currentTop !== 'auto') { cssTop = parseInt(currentTop, 10); }
+				if (currentLeft !== 'auto') { cssLeft = parseInt(currentLeft, 10); }
+								
 				// use margin positioning for positioned elements
 				css = {
-					marginTop: top,
-					marginLeft: left
+					marginTop: top + cssTop,
+					marginLeft: left + cssLeft
 				}
 			} else {
 				// try to respect an existing top/left if it's in the CSS
-				var cssTop = 0,
-					cssLeft = 0
-				;
-				
 				// look it up for position relative items
 				if (cssPosition !== 'static') {
 					// blank out the inline styles, we're going to overwrite them anyway
-					elem.style.top = null;
-					elem.style.left = null;
+					elemStyle.top = null;
+					elemStyle.left = null;
 					
 					// look up the CSS styles
-					var currentTop = elem.currentStyle.top,
-						currentLeft = elem.currentStyle.left
-					;
+					currentTop = currStyle.top;
+					currentLeft = currStyle.left;
 					
 					// if they're not 'auto' then use those
 					// TODO: handle non-pixel units and percentages
