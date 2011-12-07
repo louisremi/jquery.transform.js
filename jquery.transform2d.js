@@ -16,7 +16,7 @@
  * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  *
  */
-(function( $, window, document, Math ) {
+(function( $, window, document, Math, undefined ) {
 "use strict";
 
 /*
@@ -25,8 +25,10 @@
 var div = document.createElement("div"),
 	divStyle = div.style,
 	propertyName = "transform",
+	originPropertyName = propertyName + '-origin',
 	suffix = "Transform",
 	testProperties = [
+		propertyName,
 		"O" + suffix,
 		"ms" + suffix,
 		"Webkit" + suffix,
@@ -40,6 +42,7 @@ var div = document.createElement("div"),
 	propertyGet,
 	rMatrix = /Matrix([^)]*)/,
 	rAffine = /^\s*matrix\(\s*1\s*,\s*0\s*,\s*0\s*,\s*1\s*(?:,\s*0(?:px)?\s*){2}\)\s*$/,
+	rperc = /%/,
 	_translate = "translate",
 	_rotate = "rotate",
 	_scale = "scale",
@@ -60,6 +63,7 @@ if ( !supportProperty ) {
 
 // px isn't the default unit of this property
 $.cssNumber[propertyName] = true;
+$.cssNumber[originPropertyName] = true;
 
 /*
  * fn.css() hooks
@@ -177,32 +181,32 @@ if ( supportProperty && supportProperty != propertyName ) {
 	
 	
 	// handle transform-origin
-	var rperc = /%/,
-		originSuffix = propertyName + '-origin'
-	;
 	$.cssHooks.transformOrigin = {
 		get: function( elem, computed ) {
+			// TODO: handle computed
 			var $elem = $(elem),
-				origin = $elem.data(originSuffix)
+				origin = $elem.data(originPropertyName)
 			;
 			
 			// try to look it up in the existing CSS
 			if (!origin) {
+				// ordered backwards because we loop backwards
 				var testProperties = [
-						'-o-' + originSuffix,
-						'-moz-' + originSuffix,
-						'-webkit-' + originSuffix,
-						'-ms-' + originSuffix,
-						originSuffix
+						'-o-' + originPropertyName,
+						'-moz-' + originPropertyName,
+						'-webkit-' + originPropertyName,
+						'-ms-' + originPropertyName,
+						originPropertyName
 					],
 					i = testProperties.length,
 					currStyle = elem.currentStyle
 				;
 				
+				// loop backwards
 				while ( i-- ) {
 					if ( testProperties[i] in currStyle ) {
 						origin = currStyle[testProperties[i]];
-						$elem.data(originSuffix, origin);
+						$elem.data(originPropertyName, origin);
 						break;
 					}
 				}
@@ -211,7 +215,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 			// otherwise use the default
 			if (!origin) {
 				origin = 'center center';
-				$elem.data(originSuffix, origin);
+				$elem.data(originPropertyName, origin);
 			}
 			
 			return origin;
@@ -224,7 +228,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 			
 			// save it if there's a new value
 			// NOTE: undefined means we're trying to set a transform and need to handle translation
-			if (value === undefined) { $elem.data(originSuffix, value) }
+			if (value !== undefined) { $elem.data(originPropertyName, value) }
 			
 			// if there's no transform, don't do anything
 			if (!transform) {
@@ -309,7 +313,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 				if (currentTop !== 'auto') { cssTop = parseInt(currentTop, 10); }
 				if (currentLeft !== 'auto') { cssLeft = parseInt(currentLeft, 10); }
 								
-				// use margin positioning for positioned elements
+				// use margin positioning for positioned elements, the margins won't really negatively affect anything (get it? negative?)
 				css = {
 					marginTop: top + cssTop,
 					marginLeft: left + cssLeft
@@ -417,6 +421,14 @@ $.fx.step.transform = function( fx ) {
 		propertyHook.set( elem, transform, +true ):
 		elem.style[supportProperty] = transform;
 };
+
+
+/*
+ * fn.animate() hooks for transform-origin
+ */
+$.fx.step.transformOrigin = function( fx ) {
+	
+}
 
 /*
  * Utility functions
