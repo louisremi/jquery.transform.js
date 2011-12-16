@@ -50,6 +50,9 @@ var div = document.createElement("div"),
 	rAffine = /^\s*matrix\(\s*1\s*,\s*0\s*,\s*0\s*,\s*1\s*(?:,\s*0(?:px)?\s*){2}\)\s*$/,
 	runits = /^([\+\-]=)?(-?[\d+\.\-]+)([a-z]+|%)?(.*?)$/i,
 	rperc = /%/,
+	_relative = 'relative',
+	_static = 'static',
+	_position = 'position',
 	_translate = "translate",
 	_rotate = "rotate",
 	_scale = "scale",
@@ -202,9 +205,9 @@ if ( supportProperty && supportProperty != propertyName ) {
 			if (!origin) {
 				// ordered backwards because we loop backwards
 				var testProperties = [
-						'-o-' + originPropertyCssName,
-						'-moz-' + originPropertyCssName,
-						'-webkit-' + originPropertyCssName,
+						//'-o-' + originPropertyCssName,
+						//'-moz-' + originPropertyCssName,
+						//'-webkit-' + originPropertyCssName,
 						'-ms-' + originPropertyCssName,
 						originPropertyCssName
 					],
@@ -231,7 +234,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 			return origin;
 		},
 		
-		set: function( elem, value, animate ) {
+		set: function( elem, value ) {
 			var $elem = $(elem),
 				transform = propertyGet(elem)
 			;
@@ -266,23 +269,25 @@ if ( supportProperty && supportProperty != propertyName ) {
 					
 			// turn the origin into unitless pixels
 			// TODO: correct for non-px lengths
-			// TODO: ems would be easy enough to handle
-			origin[0] = percToPx(elem, parseFloat(origin[0]), rperc.test(origin[0]) ? '%' : '', 0, ratio); //rperc.test(origin[0]) ? parseFloat(origin[0])/100*width : parseFloat(origin[0]);
-			origin[1] = percToPx(elem, parseFloat(origin[1]), rperc.test(origin[1]) ? '%' : '', 1, ratio); //rperc.test(origin[1]) ? parseFloat(origin[1])/100*height : parseFloat(origin[1]);
+			origin[0] = percToPx(elem, parseFloat(origin[0]), rperc.test(origin[0]) ? '%' : '', 0, ratio, width, height);
+			origin[1] = percToPx(elem, parseFloat(origin[1]), rperc.test(origin[1]) ? '%' : '', 1, ratio, width, height);
 			
 			// find the origin offset
 			var	toCenter = transformVector(transform, origin[0], origin[1]),
 				fromCenter = transformVector(transform, 0, 0),
 				offset = {
-					top: (fromCenter[1]) - (toCenter[1] - origin[1]),
-					left: (fromCenter[0]) - (toCenter[0] - origin[0])
+					top: fromCenter[1] - (toCenter[1] - origin[1]),
+					left: fromCenter[0] - (toCenter[0] - origin[0])
 				},
 				sides = transformSides(transform, width, height)
 			;
 			
 			// apply the css
-			var cssPosition = $elem.css('position'),
-				css,
+			var cssPosition = $elem.css(_position),
+				usePosition = cssPosition === _relative || cssPosition === _static || $.transform.centerOrigin === _position,
+				css = {},
+				propTop = usePosition ? 'top' : 'marginTop' ,
+				propLeft = usePosition ? 'left' : 'marginLeft' ,
 				top = offset.top + ty + sides.top,
 				left = offset.left + tx + sides.left,
 				cssTop = 0,
@@ -292,52 +297,27 @@ if ( supportProperty && supportProperty != propertyName ) {
 				elemStyle = elem.style,
 				currStyle = elem.currentStyle
 			;
-			
-			if ($.transform.centerOrigin === 'margin' || cssPosition === 'absolute' || cssPosition === 'fixed') {
-				// try to respect an existing marginTop/Left if it's in the CSS
+
+			if (cssPosition === _static) {
+				css[_position] = _relative;
+			} else {
+				// try to respect an existing top/left if it's in the CSS
 				// blank out the inline styles, we're going to overwrite them anyway
-				elemStyle.marginTop = null;
-				elemStyle.marginLeft = null;
+				elemStyle[propTop] = null;
+				elemStyle[propLeft] = null;
 				
 				// look up the CSS styles
-				currentTop = currStyle.marginTop;
-				currentLeft = currStyle.marginLeft;
+				currentTop = currStyle[propTop];
+				currentLeft = currStyle[propLeft];
 				
 				// if they're not 'auto' then use those
 				// TODO: handle non-pixel units and percentages
 				if (currentTop !== 'auto') { cssTop = parseInt(currentTop, 10); }
 				if (currentLeft !== 'auto') { cssLeft = parseInt(currentLeft, 10); }
-								
-				// use margin positioning for positioned elements, the margins won't really negatively affect anything (get it? negative?)
-				css = {
-					marginTop: top + cssTop,
-					marginLeft: left + cssLeft
-				}
-			} else {
-				// try to respect an existing top/left if it's in the CSS
-				// look it up for position relative items
-				if (cssPosition !== 'static') {
-					// blank out the inline styles, we're going to overwrite them anyway
-					elemStyle.top = null;
-					elemStyle.left = null;
-					
-					// look up the CSS styles
-					currentTop = currStyle.top;
-					currentLeft = currStyle.left;
-					
-					// if they're not 'auto' then use those
-					// TODO: handle non-pixel units and percentages
-					if (currentTop !== 'auto') { cssTop = parseInt(currentTop, 10); }
-					if (currentLeft !== 'auto') { cssLeft = parseInt(currentLeft, 10); }
-				}
-				
-				// use relative positioning when possible; it's the most like the CSS3 spec.
-				css = {
-					position: 'relative',
-					top: top + cssTop,
-					left: left + cssLeft
-				}
 			}
+			
+			css[propTop] = top + cssTop;
+			css[propLeft] = left + cssLeft;
 			$elem.css(css);
 		}
 	};
@@ -467,12 +447,18 @@ $.fx.step.transformOrigin = function( fx ) {
 					}
 					startVal[i] = percToPx(elem, startVal[i], unit[i], i, ratio);
 					endVal[i] = percToPx(elem, endVal[i], matches[3], i, ratio);
+					unit[i] = unit[i] === '%' ?  matches[3] : unit[i];
 				}
 
 				// we're dealing with some differing non-px units
 				else {
 					// TODO: right now we don't support non-px units
 				}
+			}
+
+			// handle +=/-= prefixes
+			if (matches[1]) {
+				endVal[i] = startVal[i] + (matches[1] === '+=' ? 1 : -1) * endVal[i]
 			}
 		}
 		i = 2;
@@ -493,25 +479,24 @@ $.fx.step.transformOrigin = function( fx ) {
 		value[i] = (start[i] + (end[i] - start[i]) * pos) + unit[i];
 	}
 	value = value.join(' ');
+	console.log(value);
 
 	// set it and forget it
-	originPropertyHook && originPropertyHook.set ?
-		originPropertyHook.set( elem, value, +true ):
-		elem.style[supportOriginProperty] = value;
+	supportMatrixFilter ? originPropertySet( elem, value ) : elem.style[supportOriginProperty] = value;
 }
 
 /*
  * Utility functions
  */
-function percToPx(elem, value, unit, height, useRatio) {
-	var ratio = 1, $elem, height, width, outer;
+function percToPx(elem, value, unit, useHeight, useRatio, width, height) {
+	var ratio = 1, $elem, outer;
 	if (unit === '%') {
 		$elem = $(elem);
-		outer = $elem['outer' + (height ? 'Height' : 'Width')]();
+		outer = (useHeight ? height : width) || $elem['outer' + (useHeight ? 'Height' : 'Width')]();
 
 		// IE doesn't report the height and width properly
 		if ( supportMatrixFilter ) {
-			ratio = (useRatio || transformOffset(matrix(propertyGet(elem)), 1, 1))[(height ? 'height' : 'width')];
+			ratio = (useRatio || transformOffset(matrix(propertyGet(elem)), 1, 1))[(useHeight ? 'height' : 'width')];
 		}
 
 		// TODO: Chrome appears to use innerHeight/Width
@@ -579,7 +564,7 @@ function keywordsToPerc (value) {
 			// handle mixed keywords and other units
 			// TODO: this isn't 100% to spec. mixed units and keywords require the keyword in the correct position
 			split = value.split(_space);
-			if (typeof split[1] === 'undefined') { split[1] = split[0]; }
+			if (split[1] === undefined) { split[1] = split[0]; }
 			while(i--) {
 				switch(split[i]) {
 					case _left: // no break
@@ -688,8 +673,8 @@ function matrix( transform ) {
 				val = toRadian(val);
 				curr[0] = Math.cos(val);
 				curr[1] = Math.sin(val);
-				curr[2] = -Math.sin(val);
-				curr[3] = Math.cos(val);
+				curr[2] = -curr[1];
+				curr[3] = curr[0];
 				break;
 
 			case _scale+"X":
@@ -926,7 +911,22 @@ function toArray(matrix) {
 }
 
 $.transform = {
-	centerOrigin: "position"
+	centerOrigin: _position
+	toPx: function() {
+		
+	},
+
+	percentageToPx: function() {
+		
+	},
+
+	toRad: function() {
+		
+	},
+
+	toDeg: function() {
+		
+	}
 };
 
 })( jQuery, window, document, Math );

@@ -44,7 +44,7 @@ Get transform-origin
 	
 	$(elem).css('transform-origin')
 
-Usually the returned units are in pixels howerver Firefox and IE less than 9 may return percentages.
+Usually the returned units are in pixels however Firefox and IE-less-than-9 may return percentages.
 
 Relative animations
 -------------------
