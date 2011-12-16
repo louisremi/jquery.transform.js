@@ -783,7 +783,6 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
-		console.log(matrix);
 		throw new Error("matrix is singular");
 	}
 

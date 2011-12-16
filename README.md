@@ -33,6 +33,19 @@ returns a computed transform matrix.
 
     $(elem).css('transform') == 'matrix(0,1,-1,0,100,50)';
 
+Set transform-origin with a string
+----------------------------------
+
+    $(elem).css('transform-origin', 'top left');
+    $(elem).animate({transformOrigin: 'top left'});
+
+Get transform-origin
+--------------------
+	
+	$(elem).css('transform-origin')
+
+Usually the returned units are in pixels howerver Firefox and IE less than 9 may return percentages.
+
 Relative animations
 -------------------
 
@@ -46,20 +59,19 @@ Limitations:
 ============
 
 - requires jQuery 1.4.3+,
-- Should you use the *translate* property, then your elements need to be absolutely positionned in a relatively positionned wrapper **or it will fail in IE**,
-- transformOrigin is not accessible.
+- units must be px or deg (TODO)
 
-Why such restrictions with 'translate'?
----------------------------------------
 
-Since translate is unavailable in IE<9, we have to emulate it using *top* and *left* properties of the element style.  
-This can, of course, only work if the elements are absolutely positionned in a relatively positionned wrapper.  
+Potential Translation Issues in IE 8 and Below
+----------------------------------------------
 
-Other plugins position the elements and wrap them transparently.  
-I think that transparently messing with the DOM often introduces unpredictible behavior.  
-Unpredictible behavior leads developpers to fear plugins.  
-*Fear leads to anger. Anger leads to hate. Hate leads to suffering.*  
-I prefer leaving this up to you.
+Since translate and transform-origin is unavailable in IE 8 and below, we have to emulate it using `top` and `left` properties of the element style.  This library tries to emulate translate and transform-origin using position relative to reposition the element. While this closely emulates the expected behavior, if the element is already positioned, the existing position is respected as much as possible.
+
+- absolute positioned elements are repositioned using marginTop and marginLeft to avoid conclicts
+- inline styles for top and left (or marginTop and marginLeft) will be overwritten
+- changes in the height or width of the element will not be dynamically reflected
+- IE 7 and below incorrectly alter the offset height and width of the element to match the transformed offset height and width
+
 
 License
 =======
