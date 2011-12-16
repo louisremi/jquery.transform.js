@@ -25,7 +25,6 @@
 var div = document.createElement("div"),
 	divStyle = div.style,
 	propertyName = "transform",
-	originPropertyName = propertyName + '-origin',
 	suffix = "Transform",
 	testProperties = [
 		propertyName,
@@ -34,14 +33,22 @@ var div = document.createElement("div"),
 		"Webkit" + suffix,
 		"Moz" + suffix
 	],
+	originSuffix = 'Origin',
+	originPropertyCssName = propertyName + '-origin',
+	originPropertyName = propertyName + originSuffix,
 	i = testProperties.length,
 	supportProperty,
+	supportOriginProperty,
 	supportMatrixFilter,
 	supportFloat32Array = "Float32Array" in window,
 	propertyHook,
 	propertyGet,
+	originPropertyHook,
+	originPropertyGet,
+	originPropertySet,
 	rMatrix = /Matrix([^)]*)/,
 	rAffine = /^\s*matrix\(\s*1\s*,\s*0\s*,\s*0\s*,\s*1\s*(?:,\s*0(?:px)?\s*){2}\)\s*$/,
+	runits = /^([\+\-]=)?(-?[\d+\.\-]+)([a-z]+|%)?(.*?)$/i,
 	rperc = /%/,
 	_translate = "translate",
 	_rotate = "rotate",
@@ -56,6 +63,8 @@ while ( i-- ) {
 		continue;
 	}
 }
+supportOriginProperty = supportProperty + originSuffix;
+
 // IE678 alternative
 if ( !supportProperty ) {
 	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === "";
@@ -71,6 +80,7 @@ $.cssNumber[originPropertyName] = true;
 if ( supportProperty && supportProperty != propertyName ) {
 	// Modern browsers can use jQuery.cssProps as a basic hook
 	$.cssProps[propertyName] = supportProperty;
+	$.cssProps[originPropertyName] = supportOriginProperty;
 	
 	// Firefox needs a complete hook because it stuffs matrix with "px"
 	if ( supportProperty == "Moz" + suffix ) {
@@ -174,29 +184,29 @@ if ( supportProperty && supportProperty != propertyName ) {
 				$elem.data(translateY, value[5]);
 				
 				// fake the origin
-				$.cssHooks.transformOrigin.set(elem);
+				originPropertySet(elem);
 			//}
 		}
 	};
 	
 	
 	// handle transform-origin
-	$.cssHooks.transformOrigin = {
+	originPropertyHook = {
 		get: function( elem, computed ) {
 			// TODO: handle computed
 			var $elem = $(elem),
-				origin = $elem.data(originPropertyName)
+				origin = $elem.data(originPropertyCssName)
 			;
 			
 			// try to look it up in the existing CSS
 			if (!origin) {
 				// ordered backwards because we loop backwards
 				var testProperties = [
-						'-o-' + originPropertyName,
-						'-moz-' + originPropertyName,
-						'-webkit-' + originPropertyName,
-						'-ms-' + originPropertyName,
-						originPropertyName
+						'-o-' + originPropertyCssName,
+						'-moz-' + originPropertyCssName,
+						'-webkit-' + originPropertyCssName,
+						'-ms-' + originPropertyCssName,
+						originPropertyCssName
 					],
 					i = testProperties.length,
 					currStyle = elem.currentStyle
@@ -206,7 +216,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 				while ( i-- ) {
 					if ( testProperties[i] in currStyle ) {
 						origin = currStyle[testProperties[i]];
-						$elem.data(originPropertyName, origin);
+						$elem.data(originPropertyCssName, origin);
 						break;
 					}
 				}
@@ -214,8 +224,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			
 			// otherwise use the default
 			if (!origin) {
-				origin = 'center center';
-				$elem.data(originPropertyName, origin);
+				origin = '50% 50%'; // use percentages instead of keywords
+				$elem.data(originPropertyCssName, origin);
 			}
 			
 			return origin;
@@ -223,12 +233,12 @@ if ( supportProperty && supportProperty != propertyName ) {
 		
 		set: function( elem, value, animate ) {
 			var $elem = $(elem),
-				transform = $elem.css(propertyName)
+				transform = propertyGet(elem)
 			;
 			
 			// save it if there's a new value
 			// NOTE: undefined means we're trying to set a transform and need to handle translation
-			if (value !== undefined) { $elem.data(originPropertyName, value) }
+			if (value !== undefined) { $elem.data(originPropertyCssName, value) }
 			
 			// if there's no transform, don't do anything
 			if (!transform) {
@@ -242,23 +252,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			// we also fake the translation here
 			var tx = transform[4] || $elem.data(translateX) || 0,
 				ty = transform[5] || $elem.data(translateY) || 0,
-				origin = (value === undefined ? $.cssHooks.transformOrigin.get(elem) : value).split(' ')
-			;
-			
-			// correct for keyword lengths
-			// TODO: the keywords are allowed to be transposed
-			switch (origin[0]) {
-				case 'left': origin[0] = '0'; break;
-				case 'right': origin[0] = '100%'; break;
-				case 'center': // no break
-				case undefined: origin[0] = '50%';
-			}
-			switch (origin[1]) {
-				case 'top': origin[1] = '0'; break;
-				case 'bottom': origin[1] = '100%'; break;
-				case 'center': // no break
-				case undefined: origin[1] = '50%';
-			}
+				origin = keywordsToPerc(value === undefined ? originPropertyGet(elem) : value).split(' ')
+			;			
 			
 			// calculate and return the correct size
 			// find the real size of the original object
@@ -268,12 +263,12 @@ if ( supportProperty && supportProperty != propertyName ) {
 				width = $elem.outerWidth() / ratio.width,
 				height = $elem.outerHeight() / ratio.height
 			;
-			
+					
 			// turn the origin into unitless pixels
 			// TODO: correct for non-px lengths
 			// TODO: ems would be easy enough to handle
-			origin[0] = rperc.test(origin[0]) ? parseFloat(origin[0])/100*width : parseFloat(origin[0]);
-			origin[1] = rperc.test(origin[1]) ? parseFloat(origin[1])/100*height : parseFloat(origin[1]);
+			origin[0] = percToPx(elem, parseFloat(origin[0]), rperc.test(origin[0]) ? '%' : '', 0, ratio); //rperc.test(origin[0]) ? parseFloat(origin[0])/100*width : parseFloat(origin[0]);
+			origin[1] = percToPx(elem, parseFloat(origin[1]), rperc.test(origin[1]) ? '%' : '', 1, ratio); //rperc.test(origin[1]) ? parseFloat(origin[1])/100*height : parseFloat(origin[1]);
 			
 			// find the origin offset
 			var	toCenter = transformVector(transform, origin[0], origin[1]),
@@ -351,8 +346,13 @@ if ( supportProperty && supportProperty != propertyName ) {
 if ( propertyHook ) {
 	$.cssHooks[propertyName] = propertyHook;
 }
+if (originPropertyHook) {
+	$.cssHooks[originPropertyName] = originPropertyHook;
+}
 // we need a unique setter for the animation logic
 propertyGet = propertyHook && propertyHook.get || $.css;
+originPropertyGet = originPropertyHook && originPropertyHook.get || $.css;
+originPropertySet = originPropertyHook && originPropertyHook.set || $.css;
 
 /*
  * fn.animate() hooks
@@ -376,8 +376,9 @@ $.fx.step.transform = function( fx ) {
 		if ( supportMatrixFilter ) {
 			elem.style.zoom = 1;
 		}
-
+		
 		// replace "+=" in relative animations (-= is meaningless with transforms)
+		// TODO: this is crazy!
 		end = end.split("+=").join(start);
 
 		// parse both transform to generate interpolation list of same length
@@ -427,12 +428,177 @@ $.fx.step.transform = function( fx ) {
  * fn.animate() hooks for transform-origin
  */
 $.fx.step.transformOrigin = function( fx ) {
-	
+	var elem = fx.elem,
+		start,
+		end,
+		value = [],
+		pos = fx.pos,
+		i = 2, matches, unit = [], startVal, endVal, ratio;
+
+	if ( !fx.state ) {
+		// correct for keywords
+		startVal = keywordsToPerc(originPropertyGet( elem, supportOriginProperty )).split(' ');
+		endVal = keywordsToPerc(fx.end).split(' ');
+
+		// TODO: use a unit conversion library!
+		while(i--) {
+			// parse the start value
+			matches = startVal[i].match(runits);
+			unit[i] = matches[3];
+			startVal[i] = matches[2]*1;
+
+			// parse the end values
+			matches = endVal[i].match(runits);
+			endVal[i] = matches[2]*1;
+			
+			// units don't match and the second unit exists
+			if (unit[i] !== matches[3] && matches[3] && endVal[i] !== 0) {
+				// TODO: we've got a unit mismatch
+
+				// start is zero and has no unit, we're all good
+				if ( startVal[i] === 0 && !unit[i] && matches[3] ) {
+					unit[i] = matches[3];
+				}
+
+				// one of the units is a percentage (hopefully the other one is a px)
+				else if (unit[i] === '%' || matches[3] === '%') {
+					if ( supportMatrixFilter ) {
+						ratio = transformOffset(matrix(propertyGet(elem)), 1, 1);
+					}
+					startVal[i] = percToPx(elem, startVal[i], unit[i], i, ratio);
+					endVal[i] = percToPx(elem, endVal[i], matches[3], i, ratio);
+				}
+
+				// we're dealing with some differing non-px units
+				else {
+					// TODO: right now we don't support non-px units
+				}
+			}
+		}
+		i = 2;
+
+		// record the doctored values on the fx object
+		fx.start = startVal;
+		fx.end = endVal;
+		fx.unit = unit;
+	}
+
+	// read the doctored values from the fx object
+	start = fx.start;
+	end = fx.end;
+	unit = fx.unit;
+
+	// animate the values
+	while (i--) {
+		value[i] = (start[i] + (end[i] - start[i]) * pos) + unit[i];
+	}
+	value = value.join(' ');
+
+	// set it and forget it
+	originPropertyHook && originPropertyHook.set ?
+		originPropertyHook.set( elem, value, +true ):
+		elem.style[supportOriginProperty] = value;
 }
 
 /*
  * Utility functions
  */
+function percToPx(elem, value, unit, height, useRatio) {
+	var ratio = 1, $elem, height, width, outer;
+	if (unit === '%') {
+		$elem = $(elem);
+		outer = $elem['outer' + (height ? 'Height' : 'Width')]();
+
+		// IE doesn't report the height and width properly
+		if ( supportMatrixFilter ) {
+			ratio = (useRatio || transformOffset(matrix(propertyGet(elem)), 1, 1))[(height ? 'height' : 'width')];
+		}
+
+		// TODO: Chrome appears to use innerHeight/Width
+		value = outer * value / 100 / ratio;
+	}
+	return value;
+}
+
+// keywords
+function keywordsToPerc (value) {
+	var _top = 'top',
+		_right = 'right',
+		_bottom = 'bottom',
+		_center = 'center',
+		_left  = 'left',
+		_space = ' ',
+		_0 = '0',
+		_50 = '50%',
+		_100  = '100%',
+		split,
+		i = 2;
+
+	switch (value) {
+		case _top + _space + _left: // no break
+		case _left + _space + _top:
+			value = _0 + _space + _0;
+			break;
+		case _top: // no break
+		case _top + _space + _center: // no break
+		case _center + _space + _top:
+			value = _50 + _space + _0;
+			break;
+		case _right + _space + _top: // no break
+		case _top + _space + _right:
+			value = _100 + _space + _0;
+			break;
+		case _left: // no break
+		case _left + _space + _center: // no break
+		case _center + _space + _left:
+			value = _0 + _space + _50;
+			break;
+		case _right: // no break
+		case _right + _space + _center: // no break
+		case _center + _space + _right:
+			value = _100 + _space + _50;
+			break;
+		case _bottom + _space + _left: // no break
+		case _left + _space + _bottom:
+			value = _0 + _space + _100;
+			break;
+		case _bottom: // no break
+		case _bottom + _space + _center: // no break
+		case _center + _space + _bottom:
+			value = _50 + _space + _100;
+			break;
+		case _bottom + _space + _right: // no break
+		case _right + _space + _bottom:
+			value = _100 + _space + _100;
+			break;
+		case _center: // no break
+		case _center + _space + _center:
+			value = _50 + _space + _50;
+			break;
+		default:
+			// handle mixed keywords and other units
+			// TODO: this isn't 100% to spec. mixed units and keywords require the keyword in the correct position
+			split = value.split(_space);
+			if (typeof split[1] === 'undefined') { split[1] = split[0]; }
+			while(i--) {
+				switch(split[i]) {
+					case _left: // no break
+					case _top:
+						split[i] = _0;
+						break;
+					case _right: // no break
+					case _bottom:
+						split[i] = _100;
+						break;
+					case _center:
+						split[i] = _50;
+				}
+			}
+			value = split.join(_space);
+	}
+	return value;
+}
+
 // convert a vector
 function transformVector(a, x, y) {
 	return [
@@ -452,7 +618,7 @@ function transformCorners(a, x, y) {
 }
 	
 // measure the length of the sides
-// TODO: arrays are faster than objects
+// TODO: arrays are faster than objects (and compress better)
 function transformSides(a, x, y) {
 	// The corners of the box
 	var c = transformCorners(a, x, y);
@@ -466,7 +632,7 @@ function transformSides(a, x, y) {
 }
 	
 // measure the offset height and width
-// TODO: arrays are faster than objects
+// TODO: arrays are faster than objects (and compress better)
 function transformOffset(a, x, y) {
 	// The sides of the box
 	var s = transformSides(a, x, y);
@@ -617,6 +783,7 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
+		console.log(matrix);
 		throw new Error("matrix is singular");
 	}
 
