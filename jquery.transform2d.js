@@ -50,6 +50,7 @@ var div = document.createElement("div"),
 	rAffine = /^\s*matrix\(\s*1\s*,\s*0\s*,\s*0\s*,\s*1\s*(?:,\s*0(?:px)?\s*){2}\)\s*$/,
 	runits = /^([\+\-]=)?(-?[\d+\.\-]+)([a-z]+|%)?(.*?)$/i,
 	rperc = /%/,
+	_parseFloat = parseFloat,
 	_relative = 'relative',
 	_static = 'static',
 	_position = 'position',
@@ -256,22 +257,28 @@ if ( supportProperty && supportProperty != propertyName ) {
 			var tx = transform[4] || $elem.data(translateX) || 0,
 				ty = transform[5] || $elem.data(translateY) || 0,
 				origin = keywordsToPerc(value === undefined ? originPropertyGet(elem) : value).split(' ')
-			;			
-			
+			;
+
 			// calculate and return the correct size
 			// find the real size of the original object
 			// (IE reports the size of the transformed object)
 			// the ratio is basically the transformed size of 1x1 object
 			var ratio = transformOffset(transform, 1, 1),				
 				width = $elem.outerWidth() / ratio.width,
-				height = $elem.outerHeight() / ratio.height
+				height = $elem.outerHeight() / ratio.height,
+				i = 2, matches
 			;
 					
 			// turn the origin into unitless pixels
-			// TODO: correct for non-px lengths
-			origin[0] = percToPx(elem, parseFloat(origin[0]), rperc.test(origin[0]) ? '%' : '', 0, ratio, width, height);
-			origin[1] = percToPx(elem, parseFloat(origin[1]), rperc.test(origin[1]) ? '%' : '', 1, ratio, width, height);
-			
+			while (i--) {
+				matches = origin[i].match(runits);
+				if (matches[3] !== 'px') {
+					origin[i] = matches[3] === '%' ? percentageToPx(origin[i], elem, i, ratio, width, height) :  toPx(origin[i], elem);
+				} else {
+					origin[i] = _parseFloat(origin[i]);
+				}
+			}
+
 			// find the origin offset
 			var	toCenter = transformVector(transform, origin[0], origin[1]),
 				fromCenter = transformVector(transform, 0, 0),
@@ -410,8 +417,8 @@ $.fx.step.transform = function( fx ) {
 $.fx.step.transformOrigin = function( fx ) {
 	var elem = fx.elem,
 		start,
-		end,
 		value = [],
+
 		pos = fx.pos,
 		i = 2, matches, unit = [], startVal, endVal, ratio;
 
@@ -422,39 +429,20 @@ $.fx.step.transformOrigin = function( fx ) {
 
 		// TODO: use a unit conversion library!
 		while(i--) {
-			// parse the start value
-			matches = startVal[i].match(runits);
-			unit[i] = matches[3];
-			startVal[i] = matches[2]*1;
-
-			// parse the end values
+			// parse the end value for the +=/-= prefix
 			matches = endVal[i].match(runits);
-			endVal[i] = matches[2]*1;
-			
-			// units don't match and the second unit exists
-			if (unit[i] !== matches[3] && matches[3] && endVal[i] !== 0) {
-				// TODO: we've got a unit mismatch
 
-				// start is zero and has no unit, we're all good
-				if ( startVal[i] === 0 && !unit[i] && matches[3] ) {
-					unit[i] = matches[3];
-				}
-
-				// one of the units is a percentage (hopefully the other one is a px)
-				else if (unit[i] === '%' || matches[3] === '%') {
-					if ( supportMatrixFilter ) {
-						ratio = transformOffset(matrix(propertyGet(elem)), 1, 1);
-					}
-					startVal[i] = percToPx(elem, startVal[i], unit[i], i, ratio);
-					endVal[i] = percToPx(elem, endVal[i], matches[3], i, ratio);
-					unit[i] = unit[i] === '%' ?  matches[3] : unit[i];
-				}
-
-				// we're dealing with some differing non-px units
-				else {
-					// TODO: right now we don't support non-px units
-				}
+			// get the height/width ratio for IE
+			if ( supportMatrixFilter) {
+				ratio = transformOffset(matrix(propertyGet(elem)), 1, 1);
 			}
+
+			// convert the start value
+			startVal[i] = convertOriginValue(startVal[i], elem, i, ratio);
+			endVal[i] = convertOriginValue(endVal[i], elem, i, ratio);
+
+			// convert the end value
+			unit[i] = 'px';
 
 			// handle +=/-= prefixes
 			if (matches[1]) {
@@ -471,39 +459,31 @@ $.fx.step.transformOrigin = function( fx ) {
 
 	// read the doctored values from the fx object
 	start = fx.start;
-	end = fx.end;
-	unit = fx.unit;
 
 	// animate the values
 	while (i--) {
-		value[i] = (start[i] + (end[i] - start[i]) * pos) + unit[i];
+		value[i] = (start[i] + (fx.end[i] - start[i]) * pos) + fx.unit[i];
 	}
 	value = value.join(' ');
-	console.log(value);
 
 	// set it and forget it
 	supportMatrixFilter ? originPropertySet( elem, value ) : elem.style[supportOriginProperty] = value;
 }
 
-/*
- * Utility functions
- */
-function percToPx(elem, value, unit, useHeight, useRatio, width, height) {
-	var ratio = 1, $elem, outer;
-	if (unit === '%') {
-		$elem = $(elem);
-		outer = (useHeight ? height : width) || $elem['outer' + (useHeight ? 'Height' : 'Width')]();
-
-		// IE doesn't report the height and width properly
-		if ( supportMatrixFilter ) {
-			ratio = (useRatio || transformOffset(matrix(propertyGet(elem)), 1, 1))[(useHeight ? 'height' : 'width')];
-		}
-
-		// TODO: Chrome appears to use innerHeight/Width
-		value = outer * value / 100 / ratio;
+function convertOriginValue(value, elem, useHeight, useRatio) {
+	var matches = value.match(runits);
+	value = matches[2] + matches[3];
+	if (matches[3] !== 'px') {
+		value = matches[3] === '%' ? percentageToPx(value, elem, useHeight, useRatio) : toPx(value, elem);
+	} else {
+		value = _parseFloat(value);
 	}
 	return value;
 }
+
+/*
+ * Utility functions
+ */
 
 // keywords
 function keywordsToPerc (value) {
@@ -835,7 +815,7 @@ function parseFunction( type, value ) {
 		// default value is 1 for scale, 0 otherwise
 		defaultValue = +(!type.indexOf(_scale)),
 		// value is parsed to radian for skew, int otherwise
-		valueParser = !type.indexOf(_skew) ? toRadian : parseFloat,
+		valueParser = !type.indexOf(_skew) ? toRadian : _parseFloat,
 		scaleX,
 		cat = type.replace( /[XY]/, "" );
 
@@ -896,11 +876,47 @@ function append( arr1, arr2, value ) {
 
 // converts an angle string in any unit to a radian Float
 function toRadian(value) {
+	var val = _parseFloat(value), PI = Math.PI;
+
+	// TODO: why use the tilde here? seems useless?
 	return ~value.indexOf("deg") ?
-		parseInt(value,10) * (Math.PI * 2 / 360):
+		val * (PI / 180):
 		~value.indexOf("grad") ?
-			parseInt(value,10) * (Math.PI/200):
-			parseFloat(value);
+			val * (PI / 200):
+			~value.indexOf("turn") ?
+				val * (PI / 0.5):
+				val;
+}
+
+function toPx(value, elem, prop) {
+	prop = prop || 'left';
+	var style = elem.style[prop],
+		inStyle = style !== undefined && style !== null,
+		curr = $.css(elem, prop), // read the current value
+		val;
+	
+	// set the style on the target element
+	$.style( elem, prop, value);
+	val = $.css(elem, prop);
+
+	// reset the style back to what it was
+	inStyle ? $.style( this, prop, curr) : elem.style[prop] = null;
+	return _parseFloat(val);
+}
+
+function percentageToPx(value, elem, useHeight, useRatio, width, height) {
+	var ratio = 1,
+		$elem = $(elem),
+		outer = (useHeight ? height : width) || $elem['outer' + (useHeight ? 'Height' : 'Width')]();
+
+	// IE doesn't report the height and width properly
+	if ( supportMatrixFilter ) {
+		ratio = useRatio[(useHeight ? 'height' : 'width')];
+	}
+
+	// TODO: Chrome appears to use innerHeight/Width
+	value = outer * _parseFloat(value) / 100 / ratio;
+	return value;
 }
 
 // Converts "matrix(A,B,C,D,X,Y)" to [A,B,C,D,X,Y]
@@ -912,21 +928,6 @@ function toArray(matrix) {
 
 $.transform = {
 	centerOrigin: _position
-	toPx: function() {
-		
-	},
-
-	percentageToPx: function() {
-		
-	},
-
-	toRad: function() {
-		
-	},
-
-	toDeg: function() {
-		
-	}
 };
 
 })( jQuery, window, document, Math );
