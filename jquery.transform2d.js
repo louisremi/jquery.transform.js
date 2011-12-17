@@ -365,7 +365,7 @@ $.fx.step.transform = function( fx ) {
 		}
 		
 		// replace "+=" in relative animations (-= is meaningless with transforms)
-		// TODO: this is crazy!
+		// TODO: this is not how people would expect this to work. it makes more sense to support something like: rotate(+=45deg) translate(-=10px, +=15px)
 		end = end.split("+=").join(start);
 
 		// parse both transform to generate interpolation list of same length
@@ -418,9 +418,13 @@ $.fx.step.transformOrigin = function( fx ) {
 	var elem = fx.elem,
 		start,
 		value = [],
-
 		pos = fx.pos,
-		i = 2, matches, unit = [], startVal, endVal, ratio;
+		i = 2,
+		relativeUnit,
+		unit = [],
+		startVal,
+		endVal,
+		ratio;
 
 	if ( !fx.state ) {
 		// correct for keywords
@@ -430,7 +434,7 @@ $.fx.step.transformOrigin = function( fx ) {
 		// TODO: use a unit conversion library!
 		while(i--) {
 			// parse the end value for the +=/-= prefix
-			matches = endVal[i].match(runits);
+			relativeUnit = endVal[i].match(runits)[1];
 
 			// get the height/width ratio for IE
 			if ( supportMatrixFilter) {
@@ -441,12 +445,9 @@ $.fx.step.transformOrigin = function( fx ) {
 			startVal[i] = convertOriginValue(startVal[i], elem, i, ratio);
 			endVal[i] = convertOriginValue(endVal[i], elem, i, ratio);
 
-			// convert the end value
-			unit[i] = 'px';
-
 			// handle +=/-= prefixes
-			if (matches[1]) {
-				endVal[i] = startVal[i] + (matches[1] === '+=' ? 1 : -1) * endVal[i]
+			if (relativeUnit) {
+				endVal[i] = startVal[i] + (relativeUnit === '+=' ? 1 : -1) * endVal[i]
 			}
 		}
 		i = 2;
@@ -454,7 +455,7 @@ $.fx.step.transformOrigin = function( fx ) {
 		// record the doctored values on the fx object
 		fx.start = startVal;
 		fx.end = endVal;
-		fx.unit = unit;
+		fx.unit = 'px';
 	}
 
 	// read the doctored values from the fx object
@@ -462,7 +463,7 @@ $.fx.step.transformOrigin = function( fx ) {
 
 	// animate the values
 	while (i--) {
-		value[i] = (start[i] + (fx.end[i] - start[i]) * pos) + fx.unit[i];
+		value[i] = (start[i] + (fx.end[i] - start[i]) * pos) + fx.unit;
 	}
 	value = value.join(' ');
 
@@ -470,6 +471,7 @@ $.fx.step.transformOrigin = function( fx ) {
 	supportMatrixFilter ? originPropertySet( elem, value ) : elem.style[supportOriginProperty] = value;
 }
 
+// convert a value for the origin animation, accounting for +=/-=
 function convertOriginValue(value, elem, useHeight, useRatio) {
 	var matches = value.match(runits);
 	value = matches[2] + matches[3];
@@ -878,7 +880,7 @@ function append( arr1, arr2, value ) {
 function toRadian(value) {
 	var val = _parseFloat(value), PI = Math.PI;
 
-	// TODO: why use the tilde here? seems useless?
+	// TODO: why use the tilde here? seems useless, it's not like you'd ever want to see deg as the first character
 	return ~value.indexOf("deg") ?
 		val * (PI / 180):
 		~value.indexOf("grad") ?
