@@ -1,0 +1,34 @@
+{
+    "name": "transform",
+    "version": "1.0",
+    "title": "Add a transform property to $.fn.css() and $.fn.animate()",
+    "author": {
+        "name": "Louis-Rémi",
+        "url": "http://twitter.com/louis_remi"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "http://louisremi.mit-license.org"
+        }
+    ],
+    "dependencies": {
+        "jquery": ">=1.4.3",
+        "transition": "*"
+    },
+    "description": "This plugins makes it possible to use and animate 2D Transforms in all browsers, as well as 3D Transforms in compatible browsers.",
+    "keywords": [
+        "DOM",
+        "animate",
+        "transform",
+        "2D",
+        "3D",
+        "CSS3",
+        "cssHooks"
+    ],
+    "homepage": "https://github.com/louisremi/jquery.transform.js"
+    "files": [
+        "jquery.transform2d.js",
+        "jquery.transform3d.js"
+    ]
+}
