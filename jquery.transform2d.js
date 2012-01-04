@@ -16,7 +16,7 @@
  * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  *
  */
-(function( $, window, document, Math ) {
+(function( $, window, document, Math, undefined ) {
 "use strict";
 
 /*
@@ -27,19 +27,33 @@ var div = document.createElement("div"),
 	propertyName = "transform",
 	suffix = "Transform",
 	testProperties = [
+		propertyName,
 		"O" + suffix,
 		"ms" + suffix,
 		"Webkit" + suffix,
 		"Moz" + suffix
 	],
+	originSuffix = "Origin",
+	originPropertyCssName = propertyName + "-origin",
+	originPropertyName = propertyName + originSuffix,
 	i = testProperties.length,
 	supportProperty,
+	supportOriginProperty,
 	supportMatrixFilter,
 	supportFloat32Array = "Float32Array" in window,
 	propertyHook,
 	propertyGet,
+	originPropertyHook,
+	originPropertyGet,
+	originPropertySet,
 	rMatrix = /Matrix([^)]*)/,
 	rAffine = /^\s*matrix\(\s*1\s*,\s*0\s*,\s*0\s*,\s*1\s*(?:,\s*0(?:px)?\s*){2}\)\s*$/,
+	runits = /^([\+\-]=)?(-?[\d+\.\-]+)([a-z]+|%)?(.*?)$/i,
+	rperc = /%/,
+	_parseFloat = parseFloat,
+	_relative = "relative",
+	_static = "static",
+	_position = "position",
 	_translate = "translate",
 	_rotate = "rotate",
 	_scale = "scale",
@@ -53,13 +67,16 @@ while ( i-- ) {
 		continue;
 	}
 }
+supportOriginProperty = supportProperty + originSuffix;
+
 // IE678 alternative
 if ( !supportProperty ) {
 	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === "";
 }
 
-// px isn't the default unit of this property
+// px isn"t the default unit of this property
 $.cssNumber[propertyName] = true;
+$.cssNumber[originPropertyName] = true;
 
 /*
  * fn.css() hooks
@@ -67,6 +84,7 @@ $.cssNumber[propertyName] = true;
 if ( supportProperty && supportProperty != propertyName ) {
 	// Modern browsers can use jQuery.cssProps as a basic hook
 	$.cssProps[propertyName] = supportProperty;
+	$.cssProps[originPropertyName] = supportOriginProperty;
 	
 	// Firefox needs a complete hook because it stuffs matrix with "px"
 	if ( supportProperty == "Moz" + suffix ) {
@@ -110,9 +128,14 @@ if ( supportProperty && supportProperty != propertyName ) {
 	}*/
 	
 } else if ( supportMatrixFilter ) {
+	var translateX = suffix + "-translate-x",
+		translateY = suffix + "-translate-y"
+	;
+	
 	propertyHook = {
 		get: function( elem, computed ) {
-			var elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
+			var $elem = $(elem),
+				elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
 				matrix;
 
 			if ( elemStyle && rMatrix.test( elemStyle.filter ) ) {
@@ -126,12 +149,13 @@ if ( supportProperty && supportProperty != propertyName ) {
 			} else {
 				matrix = [1,0,0,1];
 			}
-			matrix[4] = elemStyle ? elemStyle.left : 0;
-			matrix[5] = elemStyle ? elemStyle.top : 0;
+			matrix[4] = $elem.data(translateX) || 0;
+			matrix[5] = $elem.data(translateY) || 0;
 			return _matrix+"(" + matrix + ")";
 		},
 		set: function( elem, value, animate ) {
-			var elemStyle = elem.style,
+			var $elem = $(elem),
+				elemStyle = elem.style,
 				currentStyle,
 				Matrix,
 				filter,
@@ -159,19 +183,149 @@ if ( supportProperty && supportProperty != propertyName ) {
 					filter.replace(rMatrix, Matrix) :
 					filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
 
-				// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
-				if ( (centerOrigin = $.transform.centerOrigin) ) {
-					elemStyle[centerOrigin == "margin" ? "marginLeft" : "left"] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + "px";
-					elemStyle[centerOrigin == "margin" ? "marginTop" : "top"] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + "px";
+				// remember the translation for later
+				$elem.data(translateX, value[4]);
+				$elem.data(translateY, value[5]);
+				
+				// fake the origin
+				originPropertySet(elem);
+			//}
+		}
+	};
+	
+	
+	// handle transform-origin
+	originPropertyHook = {
+		get: function( elem, computed ) {
+			// TODO: handle computed
+			var $elem = $(elem),
+				origin = $elem.data(originPropertyCssName)
+			;
+			
+			// try to look it up in the existing CSS
+			if (!origin) {
+				// ordered backwards because we loop backwards
+				var testProperties = [
+						//"-o-" + originPropertyCssName,
+						//"-moz-" + originPropertyCssName,
+						//"-webkit-" + originPropertyCssName,
+						"-ms-" + originPropertyCssName,
+						originPropertyCssName
+					],
+					i = testProperties.length,
+					currStyle = elem.currentStyle
+				;
+				
+				// loop backwards
+				while ( i-- ) {
+					if ( testProperties[i] in currStyle ) {
+						origin = currStyle[testProperties[i]];
+						$elem.data(originPropertyCssName, origin);
+						break;
+					}
 				}
-			//}
+			}
+			
+			// otherwise use the default
+			if (!origin) {
+				origin = "50% 50%"; // use percentages instead of keywords
+				$elem.data(originPropertyCssName, origin);
+			}
+			
+			return origin;
+		},
+		
+		set: function( elem, value ) {
+			var $elem = $(elem),
+				transform = propertyGet(elem)
+			;
+			
+			// save it if there"s a new value
+			// NOTE: undefined means we"re trying to set a transform and need to handle translation
+			if (value !== undefined) { $elem.data(originPropertyCssName, value) }
+			
+			// if there"s no transform, don"t do anything
+			if (!transform) {
+				return;
+			}
+			
+			// convert the transform into a useful array
+			transform = matrix(transform);
+			
+			// fake the origin with some fancy css
+			// we also fake the translation here
+			var tx = transform[4] || $elem.data(translateX) || 0,
+				ty = transform[5] || $elem.data(translateY) || 0,
+				origin = keywordsToPerc(value === undefined ? originPropertyGet(elem) : value).split(" ")
+			;
 
-			// translate
-			//if ( !animate || animate.T ) {
-				// We assume that the elements are absolute positionned inside a relative positionned wrapper
-				elemStyle.left = value[4] + "px";
-				elemStyle.top = value[5] + "px";
-			//}
+			// calculate and return the correct size
+			// find the real size of the original object
+			// (IE reports the size of the transformed object)
+			// the ratio is basically the transformed size of 1x1 object
+			var ratio = transformOffset(transform, 1, 1),				
+				width = $elem.outerWidth() / ratio.width,
+				height = $elem.outerHeight() / ratio.height,
+				i = 2, matches
+			;
+					
+			// turn the origin into unitless pixels
+			while (i--) {
+				matches = origin[i].match(runits);
+				if (matches[3] !== "px") {
+					origin[i] = matches[3] === "%" ? percentageToPx(origin[i], elem, i, ratio, width, height) :  toPx(origin[i], elem);
+				} else {
+					origin[i] = _parseFloat(origin[i]);
+				}
+			}
+
+			// find the origin offset
+			var	toCenter = transformVector(transform, origin[0], origin[1]),
+				fromCenter = transformVector(transform, 0, 0),
+				offset = {
+					top: fromCenter[1] - (toCenter[1] - origin[1]),
+					left: fromCenter[0] - (toCenter[0] - origin[0])
+				},
+				sides = transformSides(transform, width, height)
+			;
+			
+			// apply the css
+			var cssPosition = $elem.css(_position),
+				usePosition = cssPosition === _relative || cssPosition === _static || $.transform.centerOrigin === _position,
+				css = {},
+				propTop = usePosition ? "top" : "marginTop" ,
+				propLeft = usePosition ? "left" : "marginLeft" ,
+				top = offset.top + ty + sides.top,
+				left = offset.left + tx + sides.left,
+				cssTop = 0,
+				cssLeft = 0,
+				currentTop,
+				currentLeft,
+				elemStyle = elem.style,
+				currStyle = elem.currentStyle
+			;
+
+			if (cssPosition === _static) {
+				css[_position] = _relative;
+			} else {
+				// try to respect an existing top/left if it"s in the CSS
+				// blank out the inline styles, we"re going to overwrite them anyway
+				elemStyle[propTop] = null;
+				elemStyle[propLeft] = null;
+				
+				// look up the CSS styles
+				currentTop = currStyle[propTop];
+				currentLeft = currStyle[propLeft];
+				
+				// if they"re not "auto" then use those
+				// TODO: handle non-pixel units and percentages
+				if (currentTop !== "auto") { cssTop = parseInt(currentTop, 10); }
+				if (currentLeft !== "auto") { cssLeft = parseInt(currentLeft, 10); }
+			}
+			
+			css[propTop] = top + cssTop;
+			css[propLeft] = left + cssLeft;
+			$elem.css(css);
 		}
 	};
 }
@@ -179,8 +333,13 @@ if ( supportProperty && supportProperty != propertyName ) {
 if ( propertyHook ) {
 	$.cssHooks[propertyName] = propertyHook;
 }
+if (originPropertyHook) {
+	$.cssHooks[originPropertyName] = originPropertyHook;
+}
 // we need a unique setter for the animation logic
 propertyGet = propertyHook && propertyHook.get || $.css;
+originPropertyGet = originPropertyHook && originPropertyHook.get || $.css;
+originPropertySet = originPropertyHook && originPropertyHook.set || $.css;
 
 /*
  * fn.animate() hooks
@@ -204,8 +363,9 @@ $.fx.step.transform = function( fx ) {
 		if ( supportMatrixFilter ) {
 			elem.style.zoom = 1;
 		}
-
+		
 		// replace "+=" in relative animations (-= is meaningless with transforms)
+		// TODO: this is not how people would expect this to work. it makes more sense to support something like: rotate(+=45deg) translate(-=10px, +=15px)
 		end = end.split("+=").join(start);
 
 		// parse both transform to generate interpolation list of same length
@@ -250,15 +410,212 @@ $.fx.step.transform = function( fx ) {
 		elem.style[supportProperty] = transform;
 };
 
+
+/*
+ * fn.animate() hooks for transform-origin
+ */
+$.fx.step.transformOrigin = function( fx ) {
+	var elem = fx.elem,
+		start,
+		value = [],
+		pos = fx.pos,
+		i = 2,
+		relativeUnit,
+		unit = [],
+		startVal,
+		endVal,
+		ratio;
+
+	if ( !fx.state ) {
+		// correct for keywords
+		startVal = keywordsToPerc(originPropertyGet( elem, supportOriginProperty )).split(" ");
+		endVal = keywordsToPerc(fx.end).split(" ");
+
+		// TODO: use a unit conversion library!
+		while(i--) {
+			// parse the end value for the +=/-= prefix
+			relativeUnit = endVal[i].match(runits)[1];
+
+			// get the height/width ratio for IE
+			if ( supportMatrixFilter) {
+				ratio = transformOffset(matrix(propertyGet(elem)), 1, 1);
+			}
+
+			// convert the start value
+			startVal[i] = convertOriginValue(startVal[i], elem, i, ratio);
+			endVal[i] = convertOriginValue(endVal[i], elem, i, ratio);
+
+			// handle +=/-= prefixes
+			if (relativeUnit) {
+				endVal[i] = startVal[i] + (relativeUnit === "+=" ? 1 : -1) * endVal[i]
+			}
+		}
+		i = 2;
+
+		// record the doctored values on the fx object
+		fx.start = startVal;
+		fx.end = endVal;
+		fx.unit = "px";
+	}
+
+	// read the doctored values from the fx object
+	start = fx.start;
+
+	// animate the values
+	while (i--) {
+		value[i] = (start[i] + (fx.end[i] - start[i]) * pos) + fx.unit;
+	}
+	value = value.join(" ");
+
+	// set it and forget it
+	supportMatrixFilter ? originPropertySet( elem, value ) : elem.style[supportOriginProperty] = value;
+}
+
+// convert a value for the origin animation, accounting for +=/-=
+function convertOriginValue(value, elem, useHeight, useRatio) {
+	var matches = value.match(runits);
+	value = matches[2] + matches[3];
+	if (matches[3] !== "px") {
+		value = matches[3] === "%" ? percentageToPx(value, elem, useHeight, useRatio) : toPx(value, elem);
+	} else {
+		value = _parseFloat(value);
+	}
+	return value;
+}
+
 /*
  * Utility functions
  */
 
+// keywords
+function keywordsToPerc (value) {
+	var _top = "top",
+		_right = "right",
+		_bottom = "bottom",
+		_center = "center",
+		_left  = "left",
+		_space = " ",
+		_0 = "0",
+		_50 = "50%",
+		_100  = "100%",
+		split,
+		i = 2;
+
+	switch (value) {
+		case _top + _space + _left: // no break
+		case _left + _space + _top:
+			value = _0 + _space + _0;
+			break;
+		case _top: // no break
+		case _top + _space + _center: // no break
+		case _center + _space + _top:
+			value = _50 + _space + _0;
+			break;
+		case _right + _space + _top: // no break
+		case _top + _space + _right:
+			value = _100 + _space + _0;
+			break;
+		case _left: // no break
+		case _left + _space + _center: // no break
+		case _center + _space + _left:
+			value = _0 + _space + _50;
+			break;
+		case _right: // no break
+		case _right + _space + _center: // no break
+		case _center + _space + _right:
+			value = _100 + _space + _50;
+			break;
+		case _bottom + _space + _left: // no break
+		case _left + _space + _bottom:
+			value = _0 + _space + _100;
+			break;
+		case _bottom: // no break
+		case _bottom + _space + _center: // no break
+		case _center + _space + _bottom:
+			value = _50 + _space + _100;
+			break;
+		case _bottom + _space + _right: // no break
+		case _right + _space + _bottom:
+			value = _100 + _space + _100;
+			break;
+		case _center: // no break
+		case _center + _space + _center:
+			value = _50 + _space + _50;
+			break;
+		default:
+			// handle mixed keywords and other units
+			// TODO: this isn"t 100% to spec. mixed units and keywords require the keyword in the correct position
+			split = value.split(_space);
+			if (split[1] === undefined) { split[1] = split[0]; }
+			while(i--) {
+				switch(split[i]) {
+					case _left: // no break
+					case _top:
+						split[i] = _0;
+						break;
+					case _right: // no break
+					case _bottom:
+						split[i] = _100;
+						break;
+					case _center:
+						split[i] = _50;
+				}
+			}
+			value = split.join(_space);
+	}
+	return value;
+}
+
+// convert a vector
+function transformVector(a, x, y) {
+	return [
+		a[0] * x + a[2] * y,
+		a[1] * x + a[3] * y
+	];		
+}
+	
+// calculate the corner vectors
+function transformCorners(a, x, y) {
+	return [
+		/* tl */ transformVector(a, 0, 0),
+		/* bl */ transformVector(a, 0, y),
+		/* tr */ transformVector(a, x, 0),
+		/* br */ transformVector(a, x, y)
+	];
+}
+	
+// measure the length of the sides
+// TODO: arrays are faster than objects (and compress better)
+function transformSides(a, x, y) {
+	// The corners of the box
+	var c = transformCorners(a, x, y);
+	
+	return {
+		top: Math.min(c[0][1], c[2][1], c[3][1], c[1][1]),
+		bottom: Math.max(c[0][1], c[2][1], c[3][1], c[1][1]),
+		left: Math.min(c[0][0], c[2][0], c[3][0], c[1][0]),
+		right: Math.max(c[0][0], c[2][0], c[3][0], c[1][0])
+	};
+}
+	
+// measure the offset height and width
+// TODO: arrays are faster than objects (and compress better)
+function transformOffset(a, x, y) {
+	// The sides of the box
+	var s = transformSides(a, x, y);
+	
+	// return offset
+	return {
+		height: Math.abs(s.bottom - s.top), 
+		width: Math.abs(s.right - s.left)
+	};
+}
+
 // turns a transform string into its "matrix(A,B,C,D,X,Y)" form (as an array, though)
+// column-major order
 function matrix( transform ) {
 	transform = transform.split(")");
-	var
-			trim = $.trim
+	var trim = $.trim
 		, i = -1
 		// last element of the array is an empty string, get rid of it
 		, l = transform.length -1
@@ -267,7 +624,7 @@ function matrix( transform ) {
 		, curr = supportFloat32Array ? new Float32Array(6) : []
 		, rslt = supportFloat32Array ? new Float32Array(6) : [1,0,0,1,0,0]
 		;
-
+	
 	prev[0] = prev[3] = rslt[0] = rslt[3] = 1;
 	prev[1] = prev[2] = prev[4] = prev[5] = 0;
 
@@ -298,8 +655,8 @@ function matrix( transform ) {
 				val = toRadian(val);
 				curr[0] = Math.cos(val);
 				curr[1] = Math.sin(val);
-				curr[2] = -Math.sin(val);
-				curr[3] = Math.cos(val);
+				curr[2] = -curr[1];
+				curr[3] = curr[0];
 				break;
 
 			case _scale+"X":
@@ -341,13 +698,13 @@ function matrix( transform ) {
 				break;
 		}
 
-		// Matrix product
-		rslt[0] = prev[0] * curr[0] + prev[1] * curr[2];
-		rslt[1] = prev[0] * curr[1] + prev[1] * curr[3];
-		rslt[2] = prev[2] * curr[0] + prev[3] * curr[2];
-		rslt[3] = prev[2] * curr[1] + prev[3] * curr[3];
-		rslt[4] = prev[2] * curr[5] + prev[3] * curr[4] + prev[4];
-		rslt[5] = prev[0] * curr[5] + prev[1] * curr[4] + prev[5];
+		// Matrix product (array is in column-major order!)
+		rslt[0] = prev[0] * curr[0] + prev[2] * curr[1];
+		rslt[1] = prev[1] * curr[0] + prev[3] * curr[1];
+		rslt[2] = prev[0] * curr[2] + prev[2] * curr[3];
+		rslt[3] = prev[1] * curr[2] + prev[3] * curr[3];
+		rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
+		rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
 
 		prev = [rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5]];
 	}
@@ -357,8 +714,7 @@ function matrix( transform ) {
 // turns a matrix into its rotate, scale and skew components
 // algorithm from http://hg.mozilla.org/mozilla-central/file/7cb3e9795d04/layout/style/nsStyleAnimation.cpp
 function unmatrix(matrix) {
-	var
-			scaleX
+	var scaleX
 		, scaleY
 		, skew
 		, A = matrix[0]
@@ -461,7 +817,7 @@ function parseFunction( type, value ) {
 		// default value is 1 for scale, 0 otherwise
 		defaultValue = +(!type.indexOf(_scale)),
 		// value is parsed to radian for skew, int otherwise
-		valueParser = !type.indexOf(_skew) ? toRadian : parseFloat,
+		valueParser = !type.indexOf(_skew) ? toRadian : _parseFloat,
 		scaleX,
 		cat = type.replace( /[XY]/, "" );
 
@@ -522,11 +878,47 @@ function append( arr1, arr2, value ) {
 
 // converts an angle string in any unit to a radian Float
 function toRadian(value) {
+	var val = _parseFloat(value), PI = Math.PI;
+
+	// TODO: why use the tilde here? seems useless, it"s not like you"d ever want to see deg as the first character
 	return ~value.indexOf("deg") ?
-		parseInt(value,10) * (Math.PI * 2 / 360):
+		val * (PI / 180):
 		~value.indexOf("grad") ?
-			parseInt(value,10) * (Math.PI/200):
-			parseFloat(value);
+			val * (PI / 200):
+			~value.indexOf("turn") ?
+				val * (PI / 0.5):
+				val;
+}
+
+function toPx(value, elem, prop) {
+	prop = prop || "left";
+	var style = elem.style[prop],
+		inStyle = style !== undefined && style !== null,
+		curr = $.css(elem, prop), // read the current value
+		val;
+	
+	// set the style on the target element
+	$.style( elem, prop, value);
+	val = $.css(elem, prop);
+
+	// reset the style back to what it was
+	inStyle ? $.style( this, prop, curr) : elem.style[prop] = null;
+	return _parseFloat(val);
+}
+
+function percentageToPx(value, elem, useHeight, useRatio, width, height) {
+	var ratio = 1,
+		$elem = $(elem),
+		outer = (useHeight ? height : width) || $elem["outer" + (useHeight ? "Height" : "Width")]();
+
+	// IE doesn"t report the height and width properly
+	if ( supportMatrixFilter ) {
+		ratio = useRatio[(useHeight ? "height" : "width")];
+	}
+
+	// TODO: Chrome appears to use innerHeight/Width
+	value = outer * _parseFloat(value) / 100 / ratio;
+	return value;
 }
 
 // Converts "matrix(A,B,C,D,X,Y)" to [A,B,C,D,X,Y]
@@ -537,7 +929,7 @@ function toArray(matrix) {
 }
 
 $.transform = {
-	centerOrigin: "margin"
+	centerOrigin: _position
 };
 
 })( jQuery, window, document, Math );
