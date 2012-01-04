@@ -33,8 +33,8 @@ var div = document.createElement("div"),
 		"Webkit" + suffix,
 		"Moz" + suffix
 	],
-	originSuffix = 'Origin',
-	originPropertyCssName = propertyName + '-origin',
+	originSuffix = "Origin",
+	originPropertyCssName = propertyName + "-origin",
 	originPropertyName = propertyName + originSuffix,
 	i = testProperties.length,
 	supportProperty,
@@ -51,9 +51,9 @@ var div = document.createElement("div"),
 	runits = /^([\+\-]=)?(-?[\d+\.\-]+)([a-z]+|%)?(.*?)$/i,
 	rperc = /%/,
 	_parseFloat = parseFloat,
-	_relative = 'relative',
-	_static = 'static',
-	_position = 'position',
+	_relative = "relative",
+	_static = "static",
+	_position = "position",
 	_translate = "translate",
 	_rotate = "rotate",
 	_scale = "scale",
@@ -74,7 +74,7 @@ if ( !supportProperty ) {
 	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === "";
 }
 
-// px isn't the default unit of this property
+// px isn"t the default unit of this property
 $.cssNumber[propertyName] = true;
 $.cssNumber[originPropertyName] = true;
 
@@ -128,8 +128,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 	}*/
 	
 } else if ( supportMatrixFilter ) {
-	var translateX = suffix + '-translate-x',
-		translateY = suffix + '-translate-y'
+	var translateX = suffix + "-translate-x",
+		translateY = suffix + "-translate-y"
 	;
 	
 	propertyHook = {
@@ -206,10 +206,10 @@ if ( supportProperty && supportProperty != propertyName ) {
 			if (!origin) {
 				// ordered backwards because we loop backwards
 				var testProperties = [
-						//'-o-' + originPropertyCssName,
-						//'-moz-' + originPropertyCssName,
-						//'-webkit-' + originPropertyCssName,
-						'-ms-' + originPropertyCssName,
+						//"-o-" + originPropertyCssName,
+						//"-moz-" + originPropertyCssName,
+						//"-webkit-" + originPropertyCssName,
+						"-ms-" + originPropertyCssName,
 						originPropertyCssName
 					],
 					i = testProperties.length,
@@ -228,7 +228,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 			
 			// otherwise use the default
 			if (!origin) {
-				origin = '50% 50%'; // use percentages instead of keywords
+				origin = "50% 50%"; // use percentages instead of keywords
 				$elem.data(originPropertyCssName, origin);
 			}
 			
@@ -240,11 +240,11 @@ if ( supportProperty && supportProperty != propertyName ) {
 				transform = propertyGet(elem)
 			;
 			
-			// save it if there's a new value
-			// NOTE: undefined means we're trying to set a transform and need to handle translation
+			// save it if there"s a new value
+			// NOTE: undefined means we"re trying to set a transform and need to handle translation
 			if (value !== undefined) { $elem.data(originPropertyCssName, value) }
 			
-			// if there's no transform, don't do anything
+			// if there"s no transform, don"t do anything
 			if (!transform) {
 				return;
 			}
@@ -256,7 +256,7 @@ if ( supportProperty && supportProperty != propertyName ) {
 			// we also fake the translation here
 			var tx = transform[4] || $elem.data(translateX) || 0,
 				ty = transform[5] || $elem.data(translateY) || 0,
-				origin = keywordsToPerc(value === undefined ? originPropertyGet(elem) : value).split(' ')
+				origin = keywordsToPerc(value === undefined ? originPropertyGet(elem) : value).split(" ")
 			;
 
 			// calculate and return the correct size
@@ -272,8 +272,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			// turn the origin into unitless pixels
 			while (i--) {
 				matches = origin[i].match(runits);
-				if (matches[3] !== 'px') {
-					origin[i] = matches[3] === '%' ? percentageToPx(origin[i], elem, i, ratio, width, height) :  toPx(origin[i], elem);
+				if (matches[3] !== "px") {
+					origin[i] = matches[3] === "%" ? percentageToPx(origin[i], elem, i, ratio, width, height) :  toPx(origin[i], elem);
 				} else {
 					origin[i] = _parseFloat(origin[i]);
 				}
@@ -293,8 +293,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			var cssPosition = $elem.css(_position),
 				usePosition = cssPosition === _relative || cssPosition === _static || $.transform.centerOrigin === _position,
 				css = {},
-				propTop = usePosition ? 'top' : 'marginTop' ,
-				propLeft = usePosition ? 'left' : 'marginLeft' ,
+				propTop = usePosition ? "top" : "marginTop" ,
+				propLeft = usePosition ? "left" : "marginLeft" ,
 				top = offset.top + ty + sides.top,
 				left = offset.left + tx + sides.left,
 				cssTop = 0,
@@ -308,8 +308,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			if (cssPosition === _static) {
 				css[_position] = _relative;
 			} else {
-				// try to respect an existing top/left if it's in the CSS
-				// blank out the inline styles, we're going to overwrite them anyway
+				// try to respect an existing top/left if it"s in the CSS
+				// blank out the inline styles, we"re going to overwrite them anyway
 				elemStyle[propTop] = null;
 				elemStyle[propLeft] = null;
 				
@@ -317,10 +317,10 @@ if ( supportProperty && supportProperty != propertyName ) {
 				currentTop = currStyle[propTop];
 				currentLeft = currStyle[propLeft];
 				
-				// if they're not 'auto' then use those
+				// if they"re not "auto" then use those
 				// TODO: handle non-pixel units and percentages
-				if (currentTop !== 'auto') { cssTop = parseInt(currentTop, 10); }
-				if (currentLeft !== 'auto') { cssLeft = parseInt(currentLeft, 10); }
+				if (currentTop !== "auto") { cssTop = parseInt(currentTop, 10); }
+				if (currentLeft !== "auto") { cssLeft = parseInt(currentLeft, 10); }
 			}
 			
 			css[propTop] = top + cssTop;
@@ -428,8 +428,8 @@ $.fx.step.transformOrigin = function( fx ) {
 
 	if ( !fx.state ) {
 		// correct for keywords
-		startVal = keywordsToPerc(originPropertyGet( elem, supportOriginProperty )).split(' ');
-		endVal = keywordsToPerc(fx.end).split(' ');
+		startVal = keywordsToPerc(originPropertyGet( elem, supportOriginProperty )).split(" ");
+		endVal = keywordsToPerc(fx.end).split(" ");
 
 		// TODO: use a unit conversion library!
 		while(i--) {
@@ -447,7 +447,7 @@ $.fx.step.transformOrigin = function( fx ) {
 
 			// handle +=/-= prefixes
 			if (relativeUnit) {
-				endVal[i] = startVal[i] + (relativeUnit === '+=' ? 1 : -1) * endVal[i]
+				endVal[i] = startVal[i] + (relativeUnit === "+=" ? 1 : -1) * endVal[i]
 			}
 		}
 		i = 2;
@@ -455,7 +455,7 @@ $.fx.step.transformOrigin = function( fx ) {
 		// record the doctored values on the fx object
 		fx.start = startVal;
 		fx.end = endVal;
-		fx.unit = 'px';
+		fx.unit = "px";
 	}
 
 	// read the doctored values from the fx object
@@ -465,7 +465,7 @@ $.fx.step.transformOrigin = function( fx ) {
 	while (i--) {
 		value[i] = (start[i] + (fx.end[i] - start[i]) * pos) + fx.unit;
 	}
-	value = value.join(' ');
+	value = value.join(" ");
 
 	// set it and forget it
 	supportMatrixFilter ? originPropertySet( elem, value ) : elem.style[supportOriginProperty] = value;
@@ -475,8 +475,8 @@ $.fx.step.transformOrigin = function( fx ) {
 function convertOriginValue(value, elem, useHeight, useRatio) {
 	var matches = value.match(runits);
 	value = matches[2] + matches[3];
-	if (matches[3] !== 'px') {
-		value = matches[3] === '%' ? percentageToPx(value, elem, useHeight, useRatio) : toPx(value, elem);
+	if (matches[3] !== "px") {
+		value = matches[3] === "%" ? percentageToPx(value, elem, useHeight, useRatio) : toPx(value, elem);
 	} else {
 		value = _parseFloat(value);
 	}
@@ -489,15 +489,15 @@ function convertOriginValue(value, elem, useHeight, useRatio) {
 
 // keywords
 function keywordsToPerc (value) {
-	var _top = 'top',
-		_right = 'right',
-		_bottom = 'bottom',
-		_center = 'center',
-		_left  = 'left',
-		_space = ' ',
-		_0 = '0',
-		_50 = '50%',
-		_100  = '100%',
+	var _top = "top",
+		_right = "right",
+		_bottom = "bottom",
+		_center = "center",
+		_left  = "left",
+		_space = " ",
+		_0 = "0",
+		_50 = "50%",
+		_100  = "100%",
 		split,
 		i = 2;
 
@@ -544,7 +544,7 @@ function keywordsToPerc (value) {
 			break;
 		default:
 			// handle mixed keywords and other units
-			// TODO: this isn't 100% to spec. mixed units and keywords require the keyword in the correct position
+			// TODO: this isn"t 100% to spec. mixed units and keywords require the keyword in the correct position
 			split = value.split(_space);
 			if (split[1] === undefined) { split[1] = split[0]; }
 			while(i--) {
@@ -880,7 +880,7 @@ function append( arr1, arr2, value ) {
 function toRadian(value) {
 	var val = _parseFloat(value), PI = Math.PI;
 
-	// TODO: why use the tilde here? seems useless, it's not like you'd ever want to see deg as the first character
+	// TODO: why use the tilde here? seems useless, it"s not like you"d ever want to see deg as the first character
 	return ~value.indexOf("deg") ?
 		val * (PI / 180):
 		~value.indexOf("grad") ?
@@ -891,7 +891,7 @@ function toRadian(value) {
 }
 
 function toPx(value, elem, prop) {
-	prop = prop || 'left';
+	prop = prop || "left";
 	var style = elem.style[prop],
 		inStyle = style !== undefined && style !== null,
 		curr = $.css(elem, prop), // read the current value
@@ -909,11 +909,11 @@ function toPx(value, elem, prop) {
 function percentageToPx(value, elem, useHeight, useRatio, width, height) {
 	var ratio = 1,
 		$elem = $(elem),
-		outer = (useHeight ? height : width) || $elem['outer' + (useHeight ? 'Height' : 'Width')]();
+		outer = (useHeight ? height : width) || $elem["outer" + (useHeight ? "Height" : "Width")]();
 
-	// IE doesn't report the height and width properly
+	// IE doesn"t report the height and width properly
 	if ( supportMatrixFilter ) {
-		ratio = useRatio[(useHeight ? 'height' : 'width')];
+		ratio = useRatio[(useHeight ? "height" : "width")];
 	}
 
 	// TODO: Chrome appears to use innerHeight/Width
