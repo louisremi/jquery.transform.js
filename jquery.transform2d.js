@@ -341,13 +341,13 @@ function matrix( transform ) {
 				break;
 		}
 
-		// Matrix product
-		rslt[0] = prev[0] * curr[0] + prev[1] * curr[2];
-		rslt[1] = prev[0] * curr[1] + prev[1] * curr[3];
-		rslt[2] = prev[2] * curr[0] + prev[3] * curr[2];
-		rslt[3] = prev[2] * curr[1] + prev[3] * curr[3];
-		rslt[4] = prev[2] * curr[5] + prev[3] * curr[4] + prev[4];
-		rslt[5] = prev[0] * curr[5] + prev[1] * curr[4] + prev[5];
+		// Matrix product (array in column-major order)
+		rslt[0] = prev[0] * curr[0] + prev[2] * curr[1];
+		rslt[1] = prev[1] * curr[0] + prev[3] * curr[1];
+		rslt[2] = prev[0] * curr[2] + prev[2] * curr[3];
+		rslt[3] = prev[1] * curr[2] + prev[3] * curr[3];
+		rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
+		rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
 
 		prev = [rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5]];
 	}
