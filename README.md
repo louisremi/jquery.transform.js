@@ -36,7 +36,7 @@ returns a computed transform matrix.
 Relative animations
 -------------------
 
-Relative animations are possible by prepending "+=" at the end of the transform string.
+Relative animations are possible by prepending "+=" to the transform string.
 
     $(elem).css('transform', 'rotate(45deg)');
     // using the following syntax, elem will always rotate 90deg anticlockwise
