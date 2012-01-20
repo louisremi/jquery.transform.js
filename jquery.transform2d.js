@@ -126,8 +126,8 @@ if ( supportProperty && supportProperty != propertyName ) {
 			} else {
 				matrix = [1,0,0,1];
 			}
-			matrix[4] = elemStyle ? elemStyle.left : 0;
-			matrix[5] = elemStyle ? elemStyle.top : 0;
+			matrix[4] = elemStyle ? parseInt(elemStyle.left, 10) || 0 : 0;
+			matrix[5] = elemStyle ? parseInt(elemStyle.top, 10) || 0 : 0;
 			return _matrix+"(" + matrix + ")";
 		},
 		set: function( elem, value, animate ) {
