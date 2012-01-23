@@ -16,7 +16,7 @@
  * Send me music http://www.amazon.co.uk/wishlist/HNTU0468LQON
  *
  */
-(function( $, window, document, Math ) {
+(function( $, window, document, Math, undefined ) {
 "use strict";
 
 /*
@@ -24,7 +24,6 @@
  */
 var div = document.createElement("div"),
 	divStyle = div.style,
-	propertyName = "transform",
 	suffix = "Transform",
 	testProperties = [
 		"O" + suffix,
@@ -40,16 +39,19 @@ var div = document.createElement("div"),
 	propertyGet,
 	rMatrix = /Matrix([^)]*)/,
 	rAffine = /^\s*matrix\(\s*1\s*,\s*0\s*,\s*0\s*,\s*1\s*(?:,\s*0(?:px)?\s*){2}\)\s*$/,
+	_transform = "transform",
+	_transformOrigin = "transformOrigin",
 	_translate = "translate",
 	_rotate = "rotate",
 	_scale = "scale",
 	_skew = "skew",
 	_matrix = "matrix";
 
-// test different vendor prefixes of this property
+// test different vendor prefixes of these properties
 while ( i-- ) {
 	if ( testProperties[i] in divStyle ) {
-		$.support[propertyName] = supportProperty = testProperties[i];
+		$.support[_transform] = supportProperty = testProperties[i];
+		$.support[_transformOrigin] = supportProperty + "Origin";
 		continue;
 	}
 }
@@ -58,16 +60,17 @@ if ( !supportProperty ) {
 	$.support.matrixFilter = supportMatrixFilter = divStyle.filter === "";
 }
 
-// px isn't the default unit of this property
-$.cssNumber[propertyName] = true;
+// px isn't the default unit of these properties
+$.cssNumber[_transform] = $.cssNumber[_transformOrigin] = true;
 
 /*
  * fn.css() hooks
  */
-if ( supportProperty && supportProperty != propertyName ) {
+if ( supportProperty && supportProperty != _transform ) {
 	// Modern browsers can use jQuery.cssProps as a basic hook
-	$.cssProps[propertyName] = supportProperty;
-	
+	$.cssProps[_transform] = supportProperty;
+	$.cssProps[_transformOrigin] = supportProperty + "Origin";
+
 	// Firefox needs a complete hook because it stuffs matrix with "px"
 	if ( supportProperty == "Moz" + suffix ) {
 		propertyHook = {
@@ -108,12 +111,12 @@ if ( supportProperty && supportProperty != propertyName ) {
 			}
 		}
 	}*/
-	
+
 } else if ( supportMatrixFilter ) {
 	propertyHook = {
 		get: function( elem, computed ) {
 			var elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
-				matrix;
+				matrix, data;
 
 			if ( elemStyle && rMatrix.test( elemStyle.filter ) ) {
 				matrix = RegExp.$1.split(",");
@@ -126,8 +129,17 @@ if ( supportProperty && supportProperty != propertyName ) {
 			} else {
 				matrix = [1,0,0,1];
 			}
-			matrix[4] = elemStyle ? parseInt(elemStyle.left, 10) || 0 : 0;
-			matrix[5] = elemStyle ? parseInt(elemStyle.top, 10) || 0 : 0;
+
+			if ( ! $.cssHooks[_transformOrigin] ) {
+				matrix[4] = elemStyle ? parseInt(elemStyle.left, 10) || 0 : 0;
+				matrix[5] = elemStyle ? parseInt(elemStyle.top, 10) || 0 : 0;
+
+			} else {
+				data = $._data( elem, "transformTranslate", undefined );
+				matrix[4] = data ? data[0] : 0;
+				matrix[5] = data ? data[1] : 0;
+			}
+
 			return _matrix+"(" + matrix + ")";
 		},
 		set: function( elem, value, animate ) {
@@ -144,40 +156,42 @@ if ( supportProperty && supportProperty != propertyName ) {
 			value = matrix(value);
 
 			// rotate, scale and skew
-			//if ( !animate || animate.M ) {
-				Matrix = [
-					"Matrix("+
-						"M11="+value[0],
-						"M12="+value[2],
-						"M21="+value[1],
-						"M22="+value[3],
-						"SizingMethod='auto expand'"
-				].join();
-				filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
+			Matrix = [
+				"Matrix("+
+					"M11="+value[0],
+					"M12="+value[2],
+					"M21="+value[1],
+					"M22="+value[3],
+					"SizingMethod='auto expand'"
+			].join();
+			filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
 
-				elemStyle.filter = rMatrix.test(filter) ?
-					filter.replace(rMatrix, Matrix) :
-					filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
+			elemStyle.filter = rMatrix.test(filter) ?
+				filter.replace(rMatrix, Matrix) :
+				filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
+
+			if ( ! $.cssHooks[_transformOrigin] ) {
 
 				// center the transform origin, from pbakaus's Transformie http://github.com/pbakaus/transformie
 				if ( (centerOrigin = $.transform.centerOrigin) ) {
 					elemStyle[centerOrigin == "margin" ? "marginLeft" : "left"] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + "px";
 					elemStyle[centerOrigin == "margin" ? "marginTop" : "top"] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + "px";
 				}
-			//}
 
-			// translate
-			//if ( !animate || animate.T ) {
+				// translate
 				// We assume that the elements are absolute positionned inside a relative positionned wrapper
 				elemStyle.left = value[4] + "px";
 				elemStyle.top = value[5] + "px";
-			//}
+
+			} else {
+				$._data( elem, "transformTranslate", [ value[4], value[5] ])
+			}
 		}
 	};
 }
 // populate jQuery.cssHooks with the appropriate hook if necessary
 if ( propertyHook ) {
-	$.cssHooks[propertyName] = propertyHook;
+	$.cssHooks[_transform] = propertyHook;
 }
 // we need a unique setter for the animation logic
 propertyGet = propertyHook && propertyHook.get || $.css;
