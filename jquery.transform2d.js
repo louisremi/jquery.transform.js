@@ -114,7 +114,7 @@ if ( supportProperty && supportProperty != _transform ) {
 
 } else if ( supportMatrixFilter ) {
 	propertyHook = {
-		get: function( elem, computed ) {
+		get: function( elem, computed, asArray ) {
 			var elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
 				matrix, data;
 
@@ -140,7 +140,7 @@ if ( supportProperty && supportProperty != _transform ) {
 				matrix[5] = data ? data[1] : 0;
 			}
 
-			return _matrix+"(" + matrix + ")";
+			return asArray ? matrix : _matrix+"(" + matrix + ")";
 		},
 		set: function( elem, value, animate ) {
 			var elemStyle = elem.style,
@@ -184,7 +184,7 @@ if ( supportProperty && supportProperty != _transform ) {
 				elemStyle.top = value[5] + "px";
 
 			} else {
-				$._data( elem, "transformTranslate", [ value[4], value[5] ])
+				$.cssHooks[_transformOrigin].set( elem, value );
 			}
 		}
 	};

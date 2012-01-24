@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	h2 {
+		margin-top: 70px;
+	}
+	.ref, .rslt {
+		width: 30px;
+		height: 30px;
+	}
+	.ref {
+		background: #c33;
+		position: absolute;
+		display: none;
+	}
+	.moz .ref {
+		display: block;
+	}
+	.rslt {
+		background: #3cc;
+	}
+
+	.relative {
+		position: relative;
+	}
+	.absolute {
+		position: absolute;
+	}
+</style>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+<script src="../jquery.transform2d.js"></script>
+<!--[if lt IE 9]> <script src="../jquery.transformOrigin.js"></script> <![endif]-->
+<script>function later(code) { setTimeout(code,2000);	}</script>
+</head>
+<body>
+	<script>
+		"MozTransform" in document.createElement("div").style && ( document.body.className = "moz" );
+	</script>
+
+	<h1>Visual tests of jquery.transformOrigin.js</h1>
+
+	<h2><code>$elem.css({transformOrigin: "100% 100%", transform: "rotate(110deg)"});</code></h2>
+	<div class="ref" style="-moz-transform-origin: 100% 100%; -moz-transform: rotate(110deg)"></div>
+	<div id="test1" class="rslt"></div>
+	<script>$("#test1").css({transformOrigin: "100% 100%", transform: "rotate(110deg)"});</script>
+</body>
+</html>
