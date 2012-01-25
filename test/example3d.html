@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	#wrapper {
+		position: relative;
+		top: 50px;
+		left: 50px;
+		width: 300px;
+	}
+
+	.face {
+		width: 40px;
+		height: 40px;
+		position: absolute;
+		display: inline-block;
+		background: url(data:image/png;base64,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) 0px no-repeat;
+		-moz-transform-origin: 20px 20px 20px;
+		-webkit-transform-origin: 20px 20px 20px;
+	}
+	
+	#f1 {
+		background-position: -80px 0;
+		z-index: 2;
+		-moz-transform:  rotateX(30deg) rotateY(20deg);
+		-webkit-transform:  rotateX(30deg) rotateY(20deg);
+	}
+	
+	#f2 {
+		background-position: -120px 0;
+		-moz-transform:  rotateX(30deg) rotateY(110deg);
+		-webkit-transform:  rotateX(30deg) rotateY(110deg);
+	}
+	
+	#f3 {
+		-moz-transform:  rotateX(30deg) rotateY(200deg);
+		-webkit-transform:  rotateX(30deg) rotateY(200deg);
+	}
+	
+	#f4 {
+		background-position: -40px 0;
+		-moz-transform:  rotateX(30deg) rotateY(290deg);
+		-webkit-transform:  rotateX(30deg) rotateY(290deg);
+	}
+</style>
+</head>
+<body>
+<h1>Something you cannot do with CSS only</h1>
+<div id="wrapper">
+	<a href="http://github.com/louisremi" id="f1" class="face" data-rotateY="20"></a>
+	<a href="mailto:lrbabe@gmail.com" id="f2" class="face" data-rotateY="110"></a>
+	<a href="http://facebook.com/lrbabe" id="f3" class="face" data-rotateY="200"></a>
+	<a href="http://twitter.com/louis_remi" id="f4" class="face" data-rotateY="290"></a>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.js"></script>
+<script src="https://github.com/louisremi/jquery.transition.js/raw/master/jquery.transition.js"></script>
+<script src="../jquery.transform3d.js"></script>
+<script>
+	$(function() {
+		var blockHover,
+			frontFace = "f1";
+		$("#wrapper").delegate(".face", "mouseover", function() {
+			// interactions should be blocked while the cube is spinning 
+			// nothing should happen if hover happens on the front face
+			if ( !blockHover && this.id != frontFace ) {
+				var diff = +frontFace[1] - this.id[1];
+				
+				// handle special cases
+				diff * diff == 9 && ( diff /= -3 );
+
+				frontFace = this.id;
+				blockHover = true;
+
+				$(".face").each(function(i) {
+					var $this = $(this),
+						rotateY = 90 * diff + $this.data( "rotatey" );
+
+					$this
+						.animate({
+							transform: "rotateX(30deg) rotateY(" + rotateY + "deg)",
+							zIndex: this.id == frontFace ? 2:
+											( Math.abs( +frontFace[1] - this.id[1] ) == 2 ? 0 : 1 )
+						}).data( "rotatey", rotateY );
+
+				// unlock interaction when spinning is finished
+				}).last().queue(function() {
+					blockHover = false;
+					$(this).dequeue();
+				});
+
+			}
+		});
+	});
+</script>
+</body>
+</html>
