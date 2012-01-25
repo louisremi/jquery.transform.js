@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	h2 {
+		margin-top: 70px;
+	}
+	.ref, .rslt {
+		width: 30px;
+		height: 30px;
+	}
+	.ref {
+		background: #c33;
+		position: absolute;
+		display: none;
+	}
+	.moz .ref {
+		display: block;
+	}
+	.rslt {
+		background: #3cc;
+	}
+
+	.relative {
+		position: relative;
+	}
+	.absolute {
+		position: absolute;
+	}
+</style>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+<script src="https://github.com/louisremi/jquery.transition.js/raw/master/jquery.transition.js"></script>
+<script src="../jquery.transform3d.js"></script>
+<script>function later(code) { setTimeout(code,2000);	}</script>
+</head>
+<body>
+	<script>
+		"MozTransform" in document.createElement("div").style && ( document.body.className = "moz" );
+	</script>
+
+	<h1>Visual tests of jquery.transform3d.js</h1>
+
+	<h2><code>$elem.css("transform", "rotate(45deg)");</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg)"></div>
+	<div id="test1" class="rslt"></div>
+	<script>$("#test1").css("transform", "rotate(45deg)");</script>
+
+	<h2><code>$elem.css("transform", "skew(30deg, 10deg)");</code></h2>
+	<div class="ref" style="-moz-transform: skew(30deg, 10deg)"></div>
+	<div id="test2" class="rslt"></div>
+	<script>$("#test2").css("transform", "skew(30deg, 10deg)");</script>
+
+	<h2><code>$elem.css("transform", "scale(2, .5)");</code></h2>
+	<div class="ref" style="-moz-transform: scale(2, .5)"></div>
+	<div id="test3" class="rslt"></div>
+	<script>$("#test3").css("transform", "scale(2, .5)");</script>
+
+	<h2><code>$elem.css("transform", "translate(100px, 10px)");</code></h2>
+	<div class="ref" style="-moz-transform: translate(100px, 10px)"></div>
+	<div class="relative">
+		<div id="test4" class="rslt absolute"></div>
+	</div>
+	<script>$("#test4").css("transform", "translate(100px, 10px)");</script>
+
+	<h2><code>$elem.css("transform", "matrix(.5, .433, -.5, 1.033, 50, -10)");</code></h2>
+	<div class="ref" style="-moz-transform: matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
+	<div class="relative">
+		<div id="test5" class="rslt absolute"></div>
+	</div>
+	<script>$("#test5").css("transform", "matrix(.5, .433, -.5, 1.033, 50, -10)");</script>
+
+	<h2><code>$elem.css("transform", "rotate(45deg) translate(38px)");</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg) translate(38px)"></div>
+	<div class="relative">
+		<div id="test6" class="rslt absolute"></div>
+	</div>
+	<script>$("#test6").css("transform", "rotate(45deg) translate(38px)");</script>
+
+	<h2><code>$elem.css("transform", "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)");</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
+	<div class="relative">
+		<div id="test7" class="rslt absolute"></div>
+	</div>
+	<script>$("#test7").css("transform", "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)");</script>
+
+	<h2><code>$elem.css("transform", "rotateZ(45deg)");</code></h2>
+	<div class="ref" style="-moz-transform: rotateZ(45deg)"></div>
+	<div id="test8" class="rslt"></div>
+	<script>$("#test8").css("transform", "rotateZ(45deg)");</script>
+
+	<h2><code>$elem.css("transform", "matrix3d(.5,.433,0,0,-.5,1,0,0,0,0,1,0,50,-10,0,1)");</code></h2>
+	<div class="ref" style="-moz-transform: matrix3d(.5,.433,0,0,-.5,1,0,0,0,0,1,0,50,-10,0,1)"></div>
+	<div id="test9" class="rslt"></div>
+	<script>$("#test9").css("transform", "matrix3d(.5,.433,0,0,-.5,1,0,0,0,0,1,0,50,-10,0,1)");</script>
+
+	<h2><code>$elem.animate({"transform": "rotate(45deg)"});</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg)"></div>
+	<div id="test10" class="rslt"></div>
+	<script>later('$("#test10").animate({"transform": "rotate(45deg)"})');</script>
+
+	<h2><code>$elem.animate({"transform": "scale(.5,1)"});</code></h2>
+	<div class="ref" style="-moz-transform: scale(.5,1)"></div>
+	<div id="test11" class="rslt"></div>
+	<script>later('$("#test11").animate({"transform": "scale(.5,1)"})');</script>
+
+	<h2><code>$elem.animate({"transform": "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)}");</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
+	<div class="relative">
+		<div id="test12" class="rslt absolute"></div>
+	</div>
+	<script>later('$("#test12").animate({"transform": "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)"})');</script>
+
+</body>
+</html>
