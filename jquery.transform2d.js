@@ -17,7 +17,6 @@
  *
  */
 (function( $, window, document, Math, undefined ) {
-"use strict";
 
 /*
  * Feature tests and global variables
@@ -204,7 +203,9 @@ $.fx.step.transform = function( fx ) {
 		start = fx.start,
 		end = fx.end,
 		pos = fx.pos,
-		transform = "", i, startVal, endVal, unit;
+		transform = "",
+		precision = 1E5,
+		i, startVal, endVal, unit;
 
 	// fx.end and fx.start need to be converted to interpolation lists
 	if ( !start || typeof start === "string" ) {
@@ -244,14 +245,14 @@ $.fx.step.transform = function( fx ) {
 				unit || ( unit = "rad" );
 
 				transform = startVal[0] + "(" +
-					(startVal[1][0] + (endVal[1][0] - startVal[1][0]) * pos) + unit +","+
-					(startVal[1][1] + (endVal[1][1] - startVal[1][1]) * pos) + unit + ")"+
+					Math.round( (startVal[1][0] + (endVal[1][0] - startVal[1][0]) * pos) * precision ) / precision + unit +","+
+					Math.round( (startVal[1][1] + (endVal[1][1] - startVal[1][1]) * pos) * precision ) / precision + unit + ")"+
 					transform;
 				break;
 
 			case _rotate:
 				transform = _rotate + "(" +
-					(startVal[1] + (endVal[1] - startVal[1]) * pos) +"rad)"+
+					Math.round( (startVal[1] + (endVal[1] - startVal[1]) * pos) * precision ) / precision +"rad)"+
 					transform;
 				break;
 		}
@@ -408,7 +409,8 @@ function unmatrix(matrix) {
 
 	// matrix is singular and cannot be interpolated
 	} else {
-		throw new Error("matrix is singular");
+		// In this case the elem shouldn't be rendered, hence scale == 0
+		scaleX = scaleY = skew = 0;
 	}
 
 	// The recomposition order is very important
