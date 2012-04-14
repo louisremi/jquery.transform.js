@@ -45,10 +45,10 @@
 	<div id="test1" class="rslt"></div>
 	<script>$("#test1").css("transform", "rotate(45deg)");</script>
 
-	<h2><code>$elem.css("transform", "skew(30deg, 10deg)");</code></h2>
-	<div class="ref" style="-moz-transform: skew(30deg, 10deg)"></div>
+	<h2><code>$elem.css("transform", "skewX(30deg) skewY(10deg)");</code></h2>
+	<div class="ref" style="-moz-transform: skewX(30deg) skewY(10deg)"></div>
 	<div id="test2" class="rslt"></div>
-	<script>$("#test2").css("transform", "skew(30deg, 10deg)");</script>
+	<script>$("#test2").css("transform", "skewX(30deg) skewY(10deg)");</script>
 
 	<h2><code>$elem.css("transform", "scale(2, .5)");</code></h2>
 	<div class="ref" style="-moz-transform: scale(2, .5)"></div>
@@ -76,33 +76,33 @@
 	</div>
 	<script>$("#test6").css("transform", "rotate(45deg) translate(38px)");</script>
 
-	<h2><code>$elem.css("transform", "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)");</code></h2>
-	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
+	<h2><code>$elem.css("transform", "rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)");</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
 	<div class="relative">
 		<div id="test7" class="rslt absolute"></div>
 	</div>
-	<script>$("#test7").css("transform", "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)");</script>
+	<script>$("#test7").css("transform", "rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)");</script>
 
 	<h2><code>$elem.animate({"transform": "rotate(45deg)"});</code></h2>
 	<div class="ref" style="-moz-transform: rotate(45deg)"></div>
 	<div id="test8" class="rslt"></div>
 	<script>later('$("#test8").animate({"transform": "rotate(45deg)"})');</script>
 
-	<h2><code>$elem.animate({"transform": "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)}");</code></h2>
-	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
+	<h2><code>$elem.animate({"transform": "rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)}");</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
 	<div class="relative">
 		<div id="test9" class="rslt absolute"></div>
 	</div>
-	<script>later('$("#test9").animate({"transform": "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)"})');</script>
+	<script>later('$("#test9").animate({"transform": "rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)"})');</script>
 
-	<h2><code>$elem.css("transform", "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2)").animate({"transform": "+=rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2)");</code></h2>
-	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2) rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2)"></div>
+	<h2><code>$elem.css("transform", "rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2)").animate({"transform": "+=rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2)");</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2)"></div>
 	<div class="relative">
 		<div id="test10" class="rslt absolute"></div>
 	</div>
 	<script>
-		$("#test10").css("transform", "rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2)");
-		later('$("#test10").animate({"transform": "+=rotate(45deg) translateY(-68px) skew(-30deg) scale(1.2)"})');
+		$("#test10").css("transform", "rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2)");
+		later('$("#test10").animate({"transform": "+=rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2)"})');
 	</script>
 </body>
 </html>

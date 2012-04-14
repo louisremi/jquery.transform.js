@@ -78,9 +78,6 @@ while ( j-- ) {
 				/matrix\([^)p]*\)/.test(value) && (
 					value = value.replace(/matrix((?:[^,]*,){4})([^,]*),([^)]*)/, "matrix$1$2px,$3px")
 				);
-				/matrix3d\([^)p]*\)/.test(value) && (
-					value = value.replace(/matrix3d((?:[^,]*,){13})([^,]*),([^,]*),([^,]*)/, "matrix3d$1$2px,$3px,$4px")
-				);
 				elem.style[property] = value;
 			}
 		});

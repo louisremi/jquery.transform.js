@@ -241,8 +241,6 @@ $.fx.step.transform = function( fx ) {
 				unit = "px";
 			case _scale:
 				unit || ( unit = " ");
-			case _skew:
-				unit || ( unit = "rad" );
 
 				transform = startVal[0] + "(" +
 					Math.round( (startVal[1][0] + (endVal[1][0] - startVal[1][0]) * pos) * precision ) / precision + unit +","+
@@ -250,8 +248,10 @@ $.fx.step.transform = function( fx ) {
 					transform;
 				break;
 
+			case _skew + "X":
+			case _skew + "Y":
 			case _rotate:
-				transform = _rotate + "(" +
+				transform = startVal[0] + "(" +
 					Math.round( (startVal[1] + (endVal[1] - startVal[1]) * pos) * precision ) / precision +"rad)"+
 					transform;
 				break;
@@ -339,12 +339,6 @@ function matrix( transform ) {
 				curr[1] = Math.tan(toRadian(val));
 				break;
 
-			case _skew:
-				val = val.split(",");
-				curr[2] = Math.tan(toRadian(val[0]));
-				val[1] && ( curr[1] = Math.tan(toRadian(val[1])) );
-				break;
-
 			case _matrix:
 				val = val.split(",");
 				curr[0] = val[0];
@@ -399,8 +393,6 @@ function unmatrix(matrix) {
 		skew /= scaleY;
 		// step (6)
 		if ( A * D < B * C ) {
-			//scaleY = -scaleY;
-			//skew = -skew;
 			A = -A;
 			B = -B;
 			skew = -skew;
@@ -418,7 +410,7 @@ function unmatrix(matrix) {
 	return [
 		[_translate, [+matrix[4], +matrix[5]]],
 		[_rotate, Math.atan2(B, A)],
-		[_skew, [Math.atan(skew), 0]],
+		[_skew + "X", Math.atan(skew)],
 		[_scale, [scaleX, scaleY]]
 	];
 }
@@ -476,20 +468,18 @@ function parseFunction( type, value ) {
 	var
 		// default value is 1 for scale, 0 otherwise
 		defaultValue = +(!type.indexOf(_scale)),
-		// value is parsed to radian for skew, int otherwise
-		valueParser = !type.indexOf(_skew) ? toRadian : parseFloat,
 		scaleX,
-		cat = type.replace( /[XY]/, "" );
+		// remove X/Y from scaleX/Y & translateX/Y, not from skew
+		cat = type.replace( /e[XY]/, "e" );
 
 	switch ( type ) {
 		case _translate+"Y":
 		case _scale+"Y":
-		case _skew+"Y":
 
 			value = [
 				defaultValue,
 				value ?
-					valueParser( value ):
+					parseFloat( value ):
 					defaultValue
 			];
 			break;
@@ -499,17 +489,17 @@ function parseFunction( type, value ) {
 		case _scale+"X":
 			scaleX = 1;
 		case _scale:
-		case _skew+"X":
-		case _skew:
 
 			value = value ?
 				( value = value.split(",") ) &&	[
-					valueParser( value[0] ),
-					valueParser( value.length>1 ? value[1] : type == _scale ? scaleX || value[0] : defaultValue+"" )
+					parseFloat( value[0] ),
+					parseFloat( value.length>1 ? value[1] : type == _scale ? scaleX || value[0] : defaultValue+"" )
 				]:
 				[defaultValue, defaultValue];
 			break;
 
+		case _skew+"X":
+		case _skew+"Y":
 		case _rotate:
 			value = value ? toRadian( value ) : 0;
 			break;
