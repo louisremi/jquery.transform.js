@@ -1,26 +1,26 @@
 jquery.transform2d.js adds 2d transform capabilities to jQuery `css()` and `animate()` functions.
 
+[Demo](http://louisremi.github.com/jquery.transform.js/index.html)
+
 Usage:
 ======
 
 Set transform with a string
 ---------------------------
 
-    $(elem).css('transform', 'translate(50px, 30px) rotate(25deg) scale(2,.5) skew(-35deg)');
+    $(elem).css('transform', 'translate(50px, 30px) rotate(25deg) scale(2,.5) skewX(-35deg)');
     $(elem).animate({transform: 'translateY(-100px) rotate(1rad) scaleX(2) skewY(42deg)'});
 
-You can use the following list of transform components:
-
-- `translateX(<number>px)`
-- `translateY(<number>px)`
-- combined: `translate(<number>px, <number>px)` *the second number is optional and defaults to 0*
-- `scaleX(<number>)`
-- `scaleY(<number>)`
-- combined: `scale(<number>, <number>)` *the second number is optional and defaults to the value of the first one*
-- `rotate(<angle>)` *units for angles are *rad* (default), *deg* or *grad*.*
-- `skew(<angle>)`
-- `skew(<angle>)`
-- combined: `skew(<angle>, <angle>)` *the second angle is optional and defaults to 0*
+You can use the following list of transform functions:  
+- `translateX(<number>px)`  
+- `translateY(<number>px)`  
+- combined: `translate(<number>px, <number>px)` *the second number is optional and defaults to 0*  
+- `scaleX(<number>)`  
+- `scaleY(<number>)`  
+- combined: `scale(<number>, <number>)` *the second number is optional and defaults to the value of the first one*  
+- `rotate(<angle>)` *units for angles are *rad* (default), *deg* or *grad*.*  
+- `skewX(<angle>)`  
+- `skewY(<angle>)`  
 - `matrix(<number>, <number>, <number>, <number>, <number>, <number>)`*
 
 *`matrix` gives you more control about the resulting transformation, using a [matrix construction set](http://www.useragentman.com/matrix/).  
