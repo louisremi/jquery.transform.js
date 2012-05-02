@@ -88,6 +88,11 @@
 	<div id="test8" class="rslt"></div>
 	<script>later('$("#test8").animate({"transform": "rotate(45deg)"})');</script>
 
+	<h2><code>$elem.animate({"transform": "rotate(45deg)"}, 0);</code></h2>
+	<div class="ref" style="-moz-transform: rotate(45deg)"></div>
+	<div id="test8b" class="rslt"></div>
+	<script>later('$("#test8b").animate({"transform": "rotate(45deg)"}, 0)');</script>
+
 	<h2><code>$elem.animate({"transform": "rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50, -10)}");</code></h2>
 	<div class="ref" style="-moz-transform: rotate(45deg) translateY(-68px) skewX(-30deg) scale(1.2) matrix(.5, .433, -.5, 1.033, 50px, -10px)"></div>
 	<div class="relative">
