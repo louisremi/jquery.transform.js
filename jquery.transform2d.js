@@ -224,7 +224,9 @@ $.fx.step.transform = function( fx ) {
 		end = end.split("+=").join(start);
 
 		// parse both transform to generate interpolation list of same length
-		return $.extend( fx, interpolationList( start, end ) );
+		$.extend( fx, interpolationList( start, end ) );
+		start = fx.start;
+		end = fx.end;
 	}
 
 	i = start.length;
