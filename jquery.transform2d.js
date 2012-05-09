@@ -242,7 +242,7 @@ $.fx.step.transform = function( fx ) {
 			case _translate:
 				unit = "px";
 			case _scale:
-				unit || ( unit = " ");
+				unit || ( unit = "");
 
 				transform = startVal[0] + "(" +
 					Math.round( (startVal[1][0] + (endVal[1][0] - startVal[1][0]) * pos) * precision ) / precision + unit +","+
