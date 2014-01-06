@@ -26,7 +26,7 @@
         "CSS3",
         "cssHooks"
     ],
-    "homepage": "https://github.com/louisremi/jquery.transform.js"
+    "homepage": "https://github.com/louisremi/jquery.transform.js",
     "files": [
         "jquery.transform2d.js",
         "jquery.transform3d.js"
