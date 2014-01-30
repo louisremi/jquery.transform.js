@@ -1,0 +1,16 @@
+{
+  "name":"jquery.transform.js",
+  "version":"1.0.0",
+  "main": [
+    "jquery.transform2d.js",
+    "jquery.transform3d.js"
+  ],
+  "description":"",
+  "license":"Dual licensed under GPL and MIT licenses.",
+  "ignore":[
+  ],
+  "dependencies":{
+    "jquery":"1.42",
+  },
+  "devDependencies":{}
+}
