@@ -10,7 +10,7 @@
   "ignore":[
   ],
   "dependencies":{
-    "jquery":"1.42"
+    "jquery":"~1.7.3"
   },
   "devDependencies":{}
 }
