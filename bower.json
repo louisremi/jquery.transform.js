@@ -1,5 +1,6 @@
 {
-  "name":"jquery.transform.js",
+  "name":"jquery.transform.js", 
+  "age":10,
   "version":"1.0.0",
   "main": [
     "jquery.transform2d.js",
