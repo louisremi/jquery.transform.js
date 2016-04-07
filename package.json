@@ -1,5 +1,5 @@
 {
-    "name": "transform",
+    "name": "jquery.transform.js",
     "version": "1.0.0",
     "title": "Add a transform property to $.fn.css() and $.fn.animate()",
     "author": {
@@ -27,6 +27,7 @@
         "cssHooks"
     ],
     "homepage": "https://github.com/louisremi/jquery.transform.js",
+    "main": "jquery.transform2d.js",
     "files": [
         "jquery.transform2d.js",
         "jquery.transform3d.js"
